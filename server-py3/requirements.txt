@@ -1,0 +1,11 @@
+
+sanic==23.*
+pillow==9.*
+
+ua-parser-py
+mmh3
+
+# Sanic-Auth==0.3.0
+# sanic-session==0.8.0
+# Sanic-Cors==1.0.1
+
