@@ -19,6 +19,7 @@ pip3 install -r requirements.txt
 //2. run server:  
 // at 0.0.0.0:8000
 ```sh
+ln -s ../server-node/static
 mkdir ./uploads
 python3 main.py
 ```
