@@ -33,6 +33,7 @@ config = {
         'limit': 1048576,  # 1MB
     }
 }
+version = 'py3-1.1.0'
 
 app = Sanic(__name__)
 from sanic import Blueprint
@@ -40,6 +41,23 @@ bp = Blueprint('bp')
 
 history_path = Path('history.json')
 storage_folder = Path('./uploads')
+
+# ----------------------- config
+
+def load_config(file_path='config.json'):
+    try:
+        with open(file_path, 'r') as file:
+            config = json.load(file)
+        return config
+    except FileNotFoundError:
+        print(f"Error: The file {file_path} was not found.")
+        return None
+    except json.JSONDecodeError:
+        print(f"Error: The file {file_path} contains invalid JSON.")
+        return None
+
+config = load_config()
+print('--config:', FG.y+json.dumps(config, indent=2)+FG.z)
 
 # ----------------------- msg queue
 
@@ -442,8 +460,16 @@ async def ws_push(request, ws):
     print("\n----- new conn:", ws.remote, ws.ua, ws.room)
     print( BG.b, len(app.ctx.websockets), FG.z+FG.g+' - new conn', f'{ws.remote:21}', f'{ws.ua:20}', f'Room:{ws.room}', FG.z)
 
-    s_config = '{"event":"config","data":{"version":"py3-1.0.0","text":{"limit":4096},"file":{"expire":3600,"chunk":2097152,"limit":67108864}}}'
-    await ws.send(s_config)
+    # s_config = '{"event":"config","data":{"version":"py3-1.0.0","text":{"limit":4096},"file":{"expire":3600,"chunk":2097152,"limit":67108864}}}'
+    # await ws.send(s_config)
+    event_config = {
+        'event':'config',
+        'data':{
+            'version': version,
+            'text': config.get('text', None),
+            'file': config.get('file', None)
+    }}
+    await ws.send(json.dumps(event_config))
     await ws_send_history(ws, ws.room)
     device_id,room = await ws_send_devices(request, ws)
 
