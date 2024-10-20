@@ -21,18 +21,6 @@ from uaparser import UAParser
 from pathlib import Path
 
 
-# Config
-config = {
-    'server': {
-        # 'prefix': '/api',
-        'prefix': '',
-        # 'auth': False,
-        'auth': 'hello',
-    },
-    'text': {
-        'limit': 1048576,  # 1MB
-    }
-}
 version = 'py3-1.1.0'
 
 app = Sanic(__name__)
@@ -43,21 +31,13 @@ history_path = Path('history.json')
 storage_folder = Path('./uploads')
 
 # ----------------------- config
+from config import load_config
 
-def load_config(file_path='config.json'):
-    try:
-        with open(file_path, 'r') as file:
-            config = json.load(file)
-        return config
-    except FileNotFoundError:
-        print(f"Error: The file {file_path} was not found.")
-        return None
-    except json.JSONDecodeError:
-        print(f"Error: The file {file_path} contains invalid JSON.")
-        return None
-
+# print('--name:', __name__)
 config = load_config()
-print('--config:', FG.y+json.dumps(config, indent=2)+FG.z)
+if __name__ == '__main__':
+    print('--config:', FG.y+json.dumps(config, indent=2)+FG.z)
+
 
 '''
 d={'a':123,'c':123}
