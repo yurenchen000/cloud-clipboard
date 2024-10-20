@@ -6,8 +6,6 @@ NOTE:
  - only tested with python 3.10
 
 TODO: 
- - config
- - auth
  - code refactor
 
 ## Usage
