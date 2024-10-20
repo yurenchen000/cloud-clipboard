@@ -26,7 +26,8 @@ config = {
     'server': {
         # 'prefix': '/api',
         'prefix': '',
-        'auth': False,
+        # 'auth': False,
+        'auth': 'hello',
     },
     'text': {
         'limit': 1048576,  # 1MB
@@ -379,12 +380,21 @@ async def ws_push(request, ws):
     ws.remote = get_remote(request)
     ws.ua = get_ua(request)
     ws.room = request.args.get('room', '')
+    auth = request.args.get('auth', False)
+
+    global config
+    if auth != config.get('server').get('auth', False):
+        forbid = '{"event":"forbidden","data":{}}'
+        print('---forbid:', FG.z+FG.r+'', f'{ws.remote:21}', ws.ua, FG.z)
+        await ws.send(forbid)
+        return
+
     # print("\n----- new conn:", ws, ws.remote, ws.ua, ws.room)
     print("\n----- new conn:", ws.remote, ws.ua, ws.room)
     print( BG.b, len(app.ctx.websockets), FG.z+FG.g+' - new conn', f'{ws.remote:21}', f'{ws.ua:20}', f'Room:{ws.room}', FG.z)
 
-    config = '{"event":"config","data":{"version":"py3-1.0.0","text":{"limit":4096},"file":{"expire":3600,"chunk":2097152,"limit":67108864}}}'
-    await ws.send(config)
+    s_config = '{"event":"config","data":{"version":"py3-1.0.0","text":{"limit":4096},"file":{"expire":3600,"chunk":2097152,"limit":67108864}}}'
+    await ws.send(s_config)
     await ws_send_history(ws, ws.room)
     device_id,room = await ws_send_devices(request, ws)
 
