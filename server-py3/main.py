@@ -59,6 +59,26 @@ def load_config(file_path='config.json'):
 config = load_config()
 print('--config:', FG.y+json.dumps(config, indent=2)+FG.z)
 
+'''
+d={'a':123,'c':123}
+o={'b':345, 'a':234}
+last = {**d, **o}
+
+TODO:
+  default values //
+
+  file:
+    limit,
+    expire,   //done
+    churnk
+  text: limit //done
+  server:
+    history
+    auth   //done
+    port   //done
+    prefix //done
+'''
+
 # ----------------------- msg queue
 
 class MsgList(list):
@@ -319,7 +339,8 @@ async def upload_file(request):
         'uuid': uuid,
         'size': 0,  # Will be updated on chunk upload
         'uploadTime': int(datetime.now().timestamp()),
-        'expireTime': int(datetime.now().timestamp()) + 3600  # 1-hour expiration
+        # 'expireTime': int(datetime.now().timestamp()) + 3600  # 1-hour expiration
+        'expireTime': int(datetime.now().timestamp()) + config.get('file', {}).get('expire', 3600)
     }
     upload_file_map[uuid] = file_info
 
