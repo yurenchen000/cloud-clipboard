@@ -66,6 +66,7 @@ device_hash_seed = int(hashlib.sha256(os.urandom(32)).hexdigest(), 16) % 2**32
 
 # ----------------------- history
 
+## filter-out expire items @load
 def save_history():
     current_time = int(datetime.now().timestamp())
     filtered_files = [
@@ -87,6 +88,7 @@ def save_history():
             'receive': filtered_messages
         }, f)
 
+## filter-out expire items @save
 def load_history():
     if history_path.exists():
         with open(history_path, 'r') as f:
@@ -112,7 +114,54 @@ def load_history():
                 })
                 # print('++append', msg)
 
+            # print('---- file map:', upload_file_map)
             # print('--que:', app.ctx.message_queue, id(app.ctx.message_queue))
+
+
+## Periodically clean up expired files
+
+def del_file_by_uuid(uuid):
+    file_path = storage_folder / uuid
+    if not file_path.exists():
+        return
+
+    try:
+        file_path.unlink()
+        del upload_file_map[uuid]
+        return
+    except Exception as e:
+        pass
+
+def do_clean_expire_files():
+    to_remove = []
+    current_time = int(datetime.now().timestamp())
+
+    for uuid, item in upload_file_map.items():
+        if item['expireTime'] < current_time:
+            to_remove.append(uuid)
+            print('-- to rm:', uuid, item)
+
+    for uuid in to_remove:
+        try:
+            print('-- do rm:', uuid)
+            del_file_by_uuid(uuid)
+            del upload_file_map[uuid]
+        except Exception as err:
+            pass
+
+## implement func like js setInterval
+async def set_interval(func, time_sec):
+    while True:
+        func()
+        await asyncio.sleep(time_sec)
+
+def clean_expire_files():
+    print(datetime.now(), '--- clean expire files')
+    do_clean_expire_files()
+
+## interval 30min
+app.add_task(set_interval(clean_expire_files, 30*60))
+
 
 # ----------------------- broadcast
 async def ws_send(ws, msg, ws_list):
