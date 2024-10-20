@@ -566,5 +566,7 @@ if __name__ == "__main__":
     # print('==app:', app, id(app), threading.get_native_id())
     # print('==app.ctx:', app.ctx, id(app.ctx))
     # print('== ws:', app.ctx.websockets)
-    app.run(host="0.0.0.0", port=8000)
+    port = config.get('server', {}).get('port', 8000)
+    # app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=port)
 
