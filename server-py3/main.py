@@ -261,15 +261,15 @@ def get_ua(request):
 @bp.get('/server')
 async def get_server_info(request):
     return sanic_json({
-        'server': f"ws://{request.host}{config['server']['prefix']}/push",
-        'auth': config['server']['auth'],
+        'server': f"ws://{request.host}{config.server.prefix}/push",
+        'auth': config.server.auth,
     })
 
 @bp.post('/text')
 async def post_text_message(request):
     body = request.body.decode('utf-8')
     if len(body) > config['text']['limit']:
-        return sanic_json({'error': f"文本长度不能超过 {config['text']['limit']} 字"}, status=400)
+        return sanic_json({'error': f"文本长度不能超过 {config.text.limit} 字"}, status=400)
 
     # Escape HTML special characters
     body = body.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -320,7 +320,7 @@ async def upload_file(request):
         'size': 0,  # Will be updated on chunk upload
         'uploadTime': int(datetime.now().timestamp()),
         # 'expireTime': int(datetime.now().timestamp()) + 3600  # 1-hour expiration
-        'expireTime': int(datetime.now().timestamp()) + config.get('file', {}).get('expire', 3600)
+        'expireTime': int(datetime.now().timestamp()) + config.file.expire
     }
     upload_file_map[uuid] = file_info
 
@@ -451,7 +451,7 @@ async def ws_push(request, ws):
     auth = request.args.get('auth', False)
 
     global config
-    if auth != config.get('server').get('auth', False):
+    if auth != config.server.auth:
         forbid = '{"event":"forbidden","data":{}}'
         print('---forbid:', FG.z+FG.r+'', f'{ws.remote:21}', ws.ua, FG.z)
         await ws.send(forbid)
@@ -461,14 +461,12 @@ async def ws_push(request, ws):
     print("\n----- new conn:", ws.remote, ws.ua, ws.room)
     print( BG.b, len(app.ctx.websockets), FG.z+FG.g+' - new conn', f'{ws.remote:21}', f'{ws.ua:20}', f'Room:{ws.room}', FG.z)
 
-    # s_config = '{"event":"config","data":{"version":"py3-1.0.0","text":{"limit":4096},"file":{"expire":3600,"chunk":2097152,"limit":67108864}}}'
-    # await ws.send(s_config)
     event_config = {
         'event':'config',
         'data':{
             'version': version,
-            'text': config.get('text', None),
-            'file': config.get('file', None)
+            'text': config.text,
+            'file': config.file
     }}
     await ws.send(json.dumps(event_config))
     await ws_send_history(ws, ws.room)
@@ -538,7 +536,7 @@ app.ctx.websockets = set()  # Store WebSocket connections
 # print('==app:', app, id(app), threading.get_native_id())
 
 # app.blueprint(bp, url_prefix=config['server']['prefix'], index='index.html')
-app.blueprint(bp, url_prefix=config['server']['prefix'])
+app.blueprint(bp, url_prefix=config.server.prefix)
 
 @app.before_server_start
 async def attach_dat(app, loop):
@@ -567,7 +565,7 @@ if __name__ == "__main__":
     # print('==app:', app, id(app), threading.get_native_id())
     # print('==app.ctx:', app.ctx, id(app.ctx))
     # print('== ws:', app.ctx.websockets)
-    port = config.get('server', {}).get('port', 8000)
+    port = config.server.port
     # app.run(host="0.0.0.0", port=8000)
     app.run(host="0.0.0.0", port=port)
 
