@@ -27,8 +27,7 @@ app = Sanic(__name__)
 from sanic import Blueprint
 bp = Blueprint('bp')
 
-history_path = Path('history.json')
-storage_folder = Path('./uploads')
+
 
 # ----------------------- config
 from config import load_config
@@ -83,102 +82,13 @@ device_connected = {}
 device_hash_seed = int(hashlib.sha256(os.urandom(32)).hexdigest(), 16) % 2**32
 
 # ----------------------- history
+from history import load_history, save_history
+from history import storage_folder, history_path
 
-## filter-out expire items @load
-def save_history():
-    current_time = int(datetime.now().timestamp())
-    filtered_files = [
-        {
-            'name': file['name'],
-            'uuid': file['uuid'],
-            'size': file['size'],
-            'uploadTime': file['uploadTime'],
-            'expireTime': file['expireTime'],
-        } for file in upload_file_map.values() if file['expireTime'] > current_time
-    ]
-    filtered_messages = [
-        message['data'] for message in app.ctx.message_queue
-        if message['data']['type'] != 'file' or message['data']['expire'] > current_time
-    ]
-    with open(history_path, 'w') as f:
-        json.dump({
-            'file': filtered_files,
-            'receive': filtered_messages
-        }, f)
-
-## filter-out expire items @save
-def load_history():
-    if history_path.exists():
-        with open(history_path, 'r') as f:
-            history_data = json.load(f)
-            current_time = int(datetime.now().timestamp())
-
-            # Load historical files
-            for file in history_data['file']:
-                if Path(storage_folder / file['uuid']).exists() and file['expireTime'] > current_time:
-                    upload_file_map[file['uuid']] = file
-
-            # Load historical messages
-            for msg in history_data['receive']:
-                if msg['type'] == 'file' and msg['cache'] not in upload_file_map:
-                    continue
-                app.ctx.message_queue.append({
-                    'event': 'receive',
-                    'data': {
-                        # 'id': len(app.ctx.message_queue),
-                        'id': app.ctx.message_queue.nextid,
-                        **msg
-                    }
-                })
-                # print('++append', msg)
-
-            # print('---- file map:', upload_file_map)
-            # print('--que:', app.ctx.message_queue, id(app.ctx.message_queue))
-
-
-## Periodically clean up expired files
-
-def del_file_by_uuid(uuid):
-    file_path = storage_folder / uuid
-    if not file_path.exists():
-        return
-
-    try:
-        file_path.unlink()
-        del upload_file_map[uuid]
-        return
-    except Exception as e:
-        pass
-
-def do_clean_expire_files():
-    to_remove = []
-    current_time = int(datetime.now().timestamp())
-
-    for uuid, item in upload_file_map.items():
-        if item['expireTime'] < current_time:
-            to_remove.append(uuid)
-            print('-- to rm:', uuid, item)
-
-    for uuid in to_remove:
-        try:
-            print('-- do rm:', uuid)
-            del_file_by_uuid(uuid)
-            del upload_file_map[uuid]
-        except Exception as err:
-            pass
-
-## implement func like js setInterval
-async def set_interval(func, time_sec):
-    while True:
-        func()
-        await asyncio.sleep(time_sec)
-
-def clean_expire_files():
-    print(datetime.now(), '--- clean expire files')
-    do_clean_expire_files()
+from file_expire import set_interval, clean_expire_files
 
 ## interval 30min
-app.add_task(set_interval(clean_expire_files, 30*60))
+app.add_task(set_interval(clean_expire_files, 30*60, upload_file_map))
 
 
 # ----------------------- broadcast
@@ -288,7 +198,7 @@ async def post_text_message(request):
     app.ctx.message_queue.append(message)
 
     broadcast_ws_message(app.ctx.websockets, json.dumps(message), request.args.get('room', ''))
-    save_history()
+    save_history(upload_file_map, app.ctx.message_queue)
     return sanic_json({})
 
 @bp.delete('/revoke/<message_id:int>')
@@ -306,7 +216,7 @@ async def revoke_message(request, message_id):
         }
     }
     broadcast_ws_message(app.ctx.websockets, json.dumps(revoke_message), request.args.get('room', ''))
-    save_history()
+    save_history(upload_file_map, app.ctx.message_queue)
     return sanic_json({})
 
 
@@ -382,7 +292,7 @@ async def finish_upload(request, uuid):
     app.ctx.message_queue.append(message)
 
     broadcast_ws_message(app.ctx.websockets, json.dumps(message), request.args.get('room', ''))
-    save_history()
+    save_history(upload_file_map, app.ctx.message_queue)
     return sanic_json({})
 
 async def ws_send_history(ws, room):
@@ -521,7 +431,7 @@ async def del_file(request, uuid):
     try:
         file_path.unlink()
         del upload_file_map[uuid]
-        save_history()
+        save_history(upload_file_map, app.ctx.message_queue)
         return response.text('File deleted successfully', status=200)
     except Exception as e:
         return response.text(f'Error deleting file: {e}', status=500)
@@ -541,7 +451,7 @@ app.blueprint(bp, url_prefix=config.server.prefix)
 @app.before_server_start
 async def attach_dat(app, loop):
     print('==app:', app, id(app), threading.get_native_id())
-    load_history()
+    load_history(upload_file_map, app.ctx.message_queue)
 
 
 def dump_urls():
