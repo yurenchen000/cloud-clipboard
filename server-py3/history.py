@@ -7,6 +7,22 @@ from pathlib import Path
 history_path = Path('history.json')
 storage_folder = Path('./uploads')
 
+# ----------------------- msg queue
+class MsgList(list):
+    def __init__(self):
+        super().__init__()
+        self.nextid = 0
+
+    def append(self, item):
+        super().append(item)
+        # print('--hist append:', self.nextid, item)
+        self.nextid += 1
+        item_id = item.get('data', {}).get('id', 0)
+        if self.nextid <= item_id:
+            self.nextid = item_id + 1
+        # print('  nextid:', self.nextid)
+
+# ----------------------- history
 ## filter-out expire items @load
 def save_history(upload_file_map, message_queue):
     current_time = int(datetime.now().timestamp())

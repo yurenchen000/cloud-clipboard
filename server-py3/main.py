@@ -43,7 +43,7 @@ o={'b':345, 'a':234}
 last = {**d, **o}
 
 TODO:
-  default values //
+  default values //done
 
   file:
     limit,
@@ -58,25 +58,13 @@ TODO:
 '''
 
 # ----------------------- msg queue
-
-class MsgList(list):
-    def __init__(self):
-        super().__init__()
-        self.nextid = 0
-
-    def append(self, item):
-        super().append(item)
-        # print('--hist append:', self.nextid, item)
-        self.nextid += 1
-        item_id = item.get('data', {}).get('id', 0)
-        if self.nextid <= item_id:
-            self.nextid = item_id + 1
-        # print('  nextid:', self.nextid)
+from history import MsgList
 
 # app.ctx.message_queue = []
 app.ctx.message_queue = MsgList()
-upload_file_map = {}
+app.ctx.websockets = set()  # Store WebSocket connections
 
+upload_file_map = {}
 device_connected = {}
 device_hash_seed = int(hashlib.sha256(os.urandom(32)).hexdigest(), 16) % 2**32
 
@@ -396,7 +384,6 @@ async def del_file(request, uuid):
 bp.static('/', './static', name='ui')  ## need ui2
 bp.static('/', './static/index.html', name='ui2', strict_slashes=True)  ## ok
 
-app.ctx.websockets = set()  # Store WebSocket connections
 # print('==app:', app, id(app), threading.get_native_id())
 
 # app.blueprint(bp, url_prefix=config['server']['prefix'], index='index.html')
