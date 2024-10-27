@@ -47,10 +47,10 @@ TODO:
   file:
     limit,
     expire,   //done
-    churnk
+    chunk
   text: limit //done
   server:
-    history
+    history//done
     auth   //done
     port   //done
     prefix //done
@@ -59,8 +59,9 @@ TODO:
 # ----------------------- msg queue
 from history import MsgList
 
+# print('- config.server.history:', config.server.history)
 # app.ctx.message_queue = []
-app.ctx.message_queue = MsgList()
+app.ctx.message_queue = MsgList(config.server.history)
 app.ctx.websockets = set()  # Store WebSocket connections
 
 upload_file_map = {}

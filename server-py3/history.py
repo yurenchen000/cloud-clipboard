@@ -9,9 +9,10 @@ storage_folder = Path('./uploads')
 
 # ----------------------- msg queue
 class MsgList(list):
-    def __init__(self):
+    def __init__(self, history_len=100):
         super().__init__()
         self.nextid = 0
+        self.history_len = history_len
 
     def append(self, item):
         super().append(item)
@@ -21,6 +22,8 @@ class MsgList(list):
         if self.nextid <= item_id:
             self.nextid = item_id + 1
         # print('  nextid:', self.nextid)
+        while len(self)>self.history_len: # server.history reach max
+            self.pop(0)
 
 # ----------------------- history
 ## filter-out expire items @load
