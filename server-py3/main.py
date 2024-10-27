@@ -99,7 +99,7 @@ async def get_server_info(request):
 async def post_text_message(request):
     body = request.body.decode('utf-8')
     if len(body) > config['text']['limit']:
-        return sanic_json({'error': f"文本长度不能超过 {config.text.limit} 字"}, status=400)
+        return sanic_json({'msg': f"文本长度不能超过 {config.text.limit} 字", 'code':400}, status=400)
 
     # Escape HTML special characters
     body = body.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
@@ -125,7 +125,7 @@ async def post_text_message(request):
 async def revoke_message(request, message_id):
     idx = next((i for i, msg in enumerate(app.ctx.message_queue) if msg['data']['id'] == message_id), None)
     if idx is None:
-        return sanic_json({'error': '不存在的消息 ID'}, status=400)
+        return sanic_json({'msg': '不存在的消息 ID', 'code':400}, status=400)
 
     app.ctx.message_queue.pop(idx)
     revoke_message = {
