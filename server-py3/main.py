@@ -93,7 +93,7 @@ from utils import get_remote, get_ua
 async def get_server_info(request):
     return sanic_json({
         'server': f"ws://{request.host}{config.server.prefix}/push",
-        'auth': config.server.auth,
+        'auth': bool(config.server.auth),
     })
 
 @bp.post('/text')
