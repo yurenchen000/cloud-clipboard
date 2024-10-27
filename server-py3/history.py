@@ -60,6 +60,12 @@ def load_history(upload_file_map, message_queue):
             for file in history_data['file']:
                 if Path(storage_folder / file['uuid']).exists() and file['expireTime'] > current_time:
                     upload_file_map[file['uuid']] = file
+                else:
+                    try:
+                        print('-- del0:', file['uuid'])
+                        Path(storage_folder / file['uuid']).unlink() ## fix cache leak
+                    except Exception:
+                        pass
 
             # Load historical messages
             for msg in history_data['receive']:
