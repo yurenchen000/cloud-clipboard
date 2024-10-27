@@ -46,8 +46,9 @@ def save_history(upload_file_map, message_queue):
         json.dump({
             'file': filtered_files,
             'receive': filtered_messages
-        }, f)
-
+        # }, f)
+        # }, f, indent=4)
+        }, f, indent='\t')
 
 ## filter-out expire items @save
 def load_history(upload_file_map, message_queue):
