@@ -45,10 +45,11 @@ TODO:
   default values //done
 
   file:
-    limit,    //done
-    expire,   //done
-    chunk     //no limit
-  text: limit //done
+    limit,   //done
+    expire,  //done
+    chunk    //no limit
+  text:
+    limit    //done
   server:
     history  //done
     auth     //done
