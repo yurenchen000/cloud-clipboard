@@ -45,15 +45,15 @@ TODO:
   default values //done
 
   file:
-    limit,
+    limit,    //done
     expire,   //done
-    chunk
+    chunk     //no limit
   text: limit //done
   server:
-    history//done
-    auth   //done
-    port   //done
-    prefix //done
+    history  //done
+    auth     //done
+    port     //done
+    prefix   //done
 '''
 
 # ----------------------- msg queue
@@ -165,6 +165,10 @@ async def upload_file_chunk(request, uuid):
     data = request.body
     file_info = upload_file_map[uuid]
     file_info['size'] += len(data)
+
+    # if file_info['size'] > 10:
+    if file_info['size'] > config.file.limit:
+        return sanic_json({'code':400, 'result': '文件大小已超过限制', 'msg':''}, status=400) # same as node version
 
     # Append data to file storage
     file_path = storage_folder / uuid
