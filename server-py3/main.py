@@ -86,6 +86,7 @@ from ws_send import ws_send_devices, ws_send_history, broadcast_ws_message
 
 from utils import hash_murmur3, gen_uuid, gen_thumbnail
 from utils import get_remote, get_ua
+import html
 
 # ----------------------- Route Handlers
 
@@ -102,9 +103,10 @@ async def post_text_message(request):
     if len(body) > config['text']['limit']:
         return sanic_json({'msg': f"文本长度不能超过 {config.text.limit} 字", 'code':400}, status=400)
 
-    # Escape HTML special characters
-    body = body.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-    body = body.replace('"', '&quot;').replace("'", '&#039;')
+    # Escape HTML special characters: & < > " '"
+    # body = body.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    # body = body.replace('"', '&quot;').replace("'", '&#039;')
+    body = html.escape(body)
 
     message = {
         'event': 'receive',
