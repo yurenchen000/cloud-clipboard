@@ -5,7 +5,7 @@ cfg_default = {
     "server": {
         "host": '0.0.0.0',
         "port": 9501,
-        "prefix": '',     # server prefix 
+        "prefix": '',     # server prefix
         "history": 10,
         "auth": False,    # bool or string
     },
@@ -84,7 +84,11 @@ def load_config():
         'text'  : {**cfg_default.text,   **type_default(cfg_loaded.text,   {})}
     }
 
-    return DotDict(cfg_last)
+    config = DotDict(cfg_last)
+    if config.server.auth == '':
+        config.server.auth = False
+
+    return config
 
 ## test
 if __name__ == '__main__':
