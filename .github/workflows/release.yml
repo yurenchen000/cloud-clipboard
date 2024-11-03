@@ -20,7 +20,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: wangyoucao577/go-release-action@v1.39
+    # - uses: wangyoucao577/go-release-action@v1.39
+    - uses: wangyoucao577/go-release-action@v1.52
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         # goos: linux
