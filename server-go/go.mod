@@ -1,6 +1,6 @@
 
-module github.com/yurenchen000/cloud-clipboard/cloud-clip
-// module cloud-clip
+// module github.com/yurenchen000/cloud-clipboard/cloud-clip
+module cloud-clip
 
 go 1.22.7
 
