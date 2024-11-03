@@ -25,7 +25,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         # goos: linux
         # goarch: amd64
-        # ldflags: -s -w
+        ldflags: -s -w
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: ./server-go/cloud-clip
