@@ -112,7 +112,7 @@ async def post_text_message(request):
         'event': 'receive',
         'data': {
             # 'id': len(app.ctx.message_queue),
-            'id': app.ctx.message_queue.nextid,
+            # 'id': app.ctx.message_queue.nextid,  # NOT thread-safe
             'type': 'text',
             'room': request.args.get('room', ''),
             'content': body,
@@ -193,7 +193,7 @@ async def finish_upload(request, uuid):
         'event': 'receive',
         'data': {
             # 'id': len(app.ctx.message_queue),
-            'id': app.ctx.message_queue.nextid,
+            # 'id': app.ctx.message_queue.nextid,  # NOT thread-safe
             'type': 'file',
             'room': request.args.get('room', ''),
             'name': file_info['name'],

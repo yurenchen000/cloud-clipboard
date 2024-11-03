@@ -3,6 +3,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+import threading
 
 history_path = Path('history.json')
 storage_folder = Path('./uploads')
@@ -15,15 +16,19 @@ class MsgList(list):
         self.history_len = history_len
 
     def append(self, item):
-        super().append(item)
-        # print('--hist append:', self.nextid, item)
-        self.nextid += 1
-        item_id = item.get('data', {}).get('id', 0)
-        if self.nextid <= item_id:
-            self.nextid = item_id + 1
-        # print('  nextid:', self.nextid)
-        while len(self)>self.history_len: # server.history reach max
-            self.pop(0)
+        with threading.Lock():
+            item_id = item.get('data', {}).get('id', 0)
+            if item_id <= 0: item['data']['id'] = self.nextid # fill msg id, concurrent-safe way
+
+            super().append(item)
+            # print('--hist append:', self.nextid, item)
+            self.nextid += 1
+            if self.nextid <= item_id:
+                self.nextid = item_id + 1
+            # print('  nextid:', self.nextid)
+            while len(self)>self.history_len: # server.history reach max
+                self.pop(0)
+
 
 # ----------------------- history
 ## filter-out expire items @load
