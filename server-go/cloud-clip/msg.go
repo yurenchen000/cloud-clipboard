@@ -23,6 +23,10 @@ type PostList struct {
 func (m *PostList) Append(item *PostEvent) {
 	m.Lock()
 	defer m.Unlock()
+
+	if item.Data.ID() <= 0 { //fill uniq id, thread-safe way
+		item.Data.SetID(m.nextid)
+	}
 	m.List = append(m.List, *item)
 
 	for len(m.List) > m.history_len { //history reach max

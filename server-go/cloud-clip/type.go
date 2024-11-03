@@ -87,6 +87,17 @@ func (r ReceiveHolder) MarshalJSON() ([]byte, error) {
 	}
 	return nil, fmt.Errorf("no valid receive type found in ReceiveBaseHolder")
 }
+func (r *ReceiveHolder) SetID(id int) int {
+	if r.TextReceive != nil {
+		r.TextReceive.ID = id
+		return id
+	} else if r.FileReceive != nil {
+		r.FileReceive.ID = id
+		return id
+	}
+	return -1
+}
+
 func (r *ReceiveHolder) ID() int {
 	if r.TextReceive != nil {
 		return r.TextReceive.ID

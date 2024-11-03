@@ -70,7 +70,7 @@ func handle_text(w http.ResponseWriter, r *http.Request) {
 		Event: "receive",
 		Data: ReceiveHolder{
 			TextReceive: &TextReceive{
-				ID:   messageQueue.nextid, // NOT thread-safe
+				// ID:   messageQueue.nextid, // NOT thread-safe
 				Type: "text",
 				Room: room,
 
@@ -156,7 +156,7 @@ func handle_finish(w http.ResponseWriter, r *http.Request) {
 		Event: "receive",
 		Data: ReceiveHolder{
 			FileReceive: &FileReceive{
-				ID:   messageQueue.nextid,
+				// ID:   messageQueue.nextid, // NOT thread-safe
 				Type: "file",
 				Room: room,
 
