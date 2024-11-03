@@ -2,7 +2,8 @@
 // module github.com/yurenchen000/cloud-clipboard/cloud-clip
 module cloud-clip
 
-replace cloud-clip => github.com/yurenchen000/cloud-clipboard/server-go@go-1.3
+// replace cloud-clip => github.com/yurenchen000/cloud-clipboard/server-go@go-1.3
+replace cloud-clip => github.com/yurenchen000/cloud-clipboard/server-go go-1.3
 
 
 go 1.22.7
