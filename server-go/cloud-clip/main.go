@@ -28,7 +28,7 @@ var (
 )
 
 var config = load_config(config_path)
-var server_version = "go-1.1.0"
+var server_version = "go-1.0.1"
 
 var websockets = make(map[*websocket.Conn]bool)
 var room_ws = make(map[*websocket.Conn]string)
