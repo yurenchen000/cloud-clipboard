@@ -29,6 +29,7 @@ jobs:
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: ./server-go/cloud-clip
+        binary_name: cloud-clip
         # build_command: |
         #   make DEST=${BUILD_ARTIFACTS_FOLDER}
 
