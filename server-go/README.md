@@ -24,6 +24,7 @@ or install by cmd (need golang 1.22)
 
 ```bash
 go install -v  github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip@golang
+# got ~/go/bin/cloud-clip
 ```
 
 or build manually (need golang 1.22)
