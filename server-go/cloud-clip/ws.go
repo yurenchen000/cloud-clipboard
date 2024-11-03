@@ -22,7 +22,7 @@ import (
 // send message to ws_list
 func broadcast_ws_msg(ws_list map[*websocket.Conn]bool, message string, room string) {
 	var wg sync.WaitGroup
-	fmt.Println("--boardcast msg:", ws_list, room, message)
+	fmt.Println("--broadcast msg:", ws_list, room, message)
 	for ws := range ws_list {
 		if room_ws[ws] == room {
 			wg.Add(1)
