@@ -28,9 +28,9 @@ var (
 	deviceConnected = make(map[string]string)
 )
 
+var server_version = "go-1.x.x"
 var build_git_hash = show_bin_info()
 var config = load_config(config_path) // run before main()
-var server_version = "go-1.0.1"
 
 var websockets = make(map[*websocket.Conn]bool)
 var room_ws = make(map[*websocket.Conn]string)
