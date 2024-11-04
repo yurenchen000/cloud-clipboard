@@ -342,9 +342,12 @@ func show_bin_info() string {
 				break
 			}
 		}
+
+		if len(gitHash) > 7 {
+			gitHash = gitHash[:7]
+		}
 	}
 
-	gitHash = gitHash[:7]
 	// fmt.Println("== cloud-clip: ", server_version)
 	fmt.Printf("== \033[07m cloud-clip \033[36m %s \033[0m     \033[35m %s  %s     %s\033[0m\n",
 		server_version, gitHash, buildInfo.GoVersion, buildInfo.Main.Version)
