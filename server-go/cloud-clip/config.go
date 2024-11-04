@@ -35,6 +35,7 @@ type Config struct {
 var config_path = "config.json"
 
 func load_config(config_path string) *Config {
+	_ = build_git_hash // improve global var init order
 
 	// Read the config.json file_content
 	// file_content, err := ioutil.ReadFile("config.json")
@@ -66,11 +67,11 @@ func load_config(config_path string) *Config {
 	if config.Server.Auth != nil {
 		switch auth := config.Server.Auth.(type) {
 		case bool:
-			fmt.Printf("Auth is a boolean: %v\n", auth)
+			fmt.Printf("Auth is bool: %v\n", auth)
 		case string:
-			fmt.Printf("Auth is a string: %s\n", auth)
+			fmt.Printf("Auth is str: %s\n", auth)
 		default:
-			fmt.Printf("Auth is of an unexpected type: %T\n", auth)
+			fmt.Printf("Auth is unexpected type: %T\n", auth)
 		}
 	} else {
 		fmt.Println("Auth field is not provided in the config file")

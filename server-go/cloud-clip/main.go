@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -27,7 +28,8 @@ var (
 	deviceConnected = make(map[string]string)
 )
 
-var config = load_config(config_path)
+var build_git_hash = show_bin_info()
+var config = load_config(config_path) // run before main()
 var server_version = "go-1.0.1"
 
 var websockets = make(map[*websocket.Conn]bool)
@@ -325,6 +327,29 @@ func handle_revoke(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{})
+}
+
+func show_bin_info() string {
+	buildInfo, ok := debug.ReadBuildInfo()
+	var gitHash string
+
+	if !ok {
+		// log.Fatal("Failed to read build info")
+	} else {
+		for _, setting := range buildInfo.Settings {
+			if setting.Key == "vcs.revision" {
+				gitHash = setting.Value
+				break
+			}
+		}
+	}
+
+	gitHash = gitHash[:7]
+	// fmt.Println("== cloud-clip: ", server_version)
+	fmt.Printf("== \033[07m cloud-clip \033[36m %s \033[0m     \033[35m %s  %s     %s\033[0m\n",
+		server_version, gitHash, buildInfo.GoVersion, buildInfo.Main.Version)
+
+	return gitHash
 }
 
 func main() {
