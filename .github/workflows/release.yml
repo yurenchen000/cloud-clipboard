@@ -26,7 +26,8 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         # goos: linux
         # goarch: amd64
-        ldflags: -s -w
+        ldflags: -s -w -X main.server_version=${{github.event.release.tag_name}}
+        goversion: 1.22
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: ./server-go/cloud-clip
@@ -37,6 +38,6 @@ jobs:
         #  env GO111MODULE=off go build -o hello
         #  env GO111MODULE=off go build -o world
         # can't use multi cmd
-        # no strip cmd
+        # no strip cmd: use -ldflags -s -w 
         md5sum: FALSE
 
