@@ -37,6 +37,8 @@ jobs:
         npm install
         NODE_OPTIONS=--openssl-legacy-provider npm run build
         cp -pvr ../server-node/static ../server-go/cloud-clip/
+        find ../server-go/cloud-clip/static/ -iname '*.br' -delete
+        find ../server-go/cloud-clip/static/ -iname '*.gz' -delete
 
     ## 3. build go binary
     - name: Build server-go
