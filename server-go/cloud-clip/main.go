@@ -199,9 +199,10 @@ func handle_push(w http.ResponseWriter, r *http.Request) {
 		delete(room_ws, ws)
 		return nil
 	})
-	remoteAddr := ws.RemoteAddr().String()
+	// remoteAddr := ws.RemoteAddr().String()
 	ua := get_UA(r)
-	// ip, port := get_remote(r)
+	ip, port := get_remote(r)
+	remoteAddr := ip + ":" + port
 	// fmt.Println("\n----- new conn:", ip, port, room)
 	fmt.Println("\n----- new conn:", remoteAddr, room)
 

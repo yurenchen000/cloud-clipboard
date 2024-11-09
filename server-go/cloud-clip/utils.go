@@ -51,10 +51,16 @@ const (
 
 func get_remote(r *http.Request) (ip, port string) {
 	ip, port, _ = net.SplitHostPort(r.RemoteAddr)
-	remote := r.Header.Get("X-Forwarded-Remote") //ip only
-	if remote != "" {
-		ip = remote
+	real_ip := r.Header.Get("X-Real-IP")   //ip only
+	real_pt := r.Header.Get("X-Real-Port") //port only
+	fmt.Println("==ip, port, remote:", ip, port, real_ip, real_pt)
+	if real_ip != "" {
+		ip = real_ip
 	}
+	if real_pt != "" {
+		port = real_pt
+	}
+
 	return
 }
 
