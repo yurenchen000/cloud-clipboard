@@ -190,7 +190,12 @@ func handle_finish(w http.ResponseWriter, r *http.Request) {
 
 func handle_push(w http.ResponseWriter, r *http.Request) {
 	room := r.URL.Query().Get("room")
-	ws, _ := upgrader.Upgrade(w, r, nil)
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, "-- ws conn fail", http.StatusInternalServerError)
+		return
+	}
+
 	defer ws.Close()
 	room_ws[ws] = room
 	websockets[ws] = true
