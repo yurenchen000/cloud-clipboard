@@ -355,10 +355,26 @@ func show_bin_info() string {
 	return gitHash
 }
 
+// make sure uploads exist
+func mkdir_uploads() {
+	uploadsDir := "uploads"
+	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
+		err := os.MkdirAll(uploadsDir, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create uploads directory: %v", err)
+		}
+		log.Println("++ uploads directory Created")
+	} else {
+		fmt.Println("== uploads directory Exists")
+	}
+}
+
 func main() {
 	load_history()
 
 	prefix := config.Server.Prefix
+
+	mkdir_uploads() // mkdir -p uplodas
 
 	// static
 	http.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.Dir("./static"))))
