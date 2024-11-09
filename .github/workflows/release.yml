@@ -19,9 +19,29 @@ jobs:
             goos: darwin
 
     steps:
+    ## 1. checkout
     - uses: actions/checkout@v3
+
+    ## 2. build frontend
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: latest
+        architecture: x64
+        check-latest: true
+        cache: npm
+        cache-dependency-path: "**/package.json"
+    - name: Build Frontend
+      run: |
+        cd client
+        npm install
+        NODE_OPTIONS=--openssl-legacy-provider npm run build
+        cp -pvr ../server-node/static ../server-go/
+
+    ## 3. build go binary
+    - name: Build server-go
     # - uses: wangyoucao577/go-release-action@v1.39
-    - uses: wangyoucao577/go-release-action@v1.52
+      uses: wangyoucao577/go-release-action@v1.52
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         # goos: linux
