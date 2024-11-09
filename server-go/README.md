@@ -21,13 +21,14 @@ NOTE:
 download binary from release page  
 
 or install by cmd (need golang ≥ 1.18)
-
+//without embed static res
 ```bash
 go install -v  github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip@golang
 # got ~/go/bin/cloud-clip
 ```
 
 or build manually (need golang ≥ 1.18)
+//should build client/ first
 ```bash
 git clone git@github.com:yurenchen000/cloud-clipboard.git --branch golang
 cd cloud-clipboard/server-go/cloud-clip/
