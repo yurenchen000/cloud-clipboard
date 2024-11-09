@@ -13,21 +13,21 @@
 
 NOTE: 
  - almost all features
- - only tested with ubuntu 22, go-1.22
+ - only tested with ubuntu 22, go-1.22, go-1.18
 
 ## 1. Install
 //1. install:  
 
 download binary from release page  
 
-or install by cmd (need golang 1.22)
+or install by cmd (need golang ≥ 1.18)
 
 ```bash
 go install -v  github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip@golang
 # got ~/go/bin/cloud-clip
 ```
 
-or build manually (need golang 1.22)
+or build manually (need golang ≥ 1.18)
 ```bash
 git clone git@github.com:yurenchen000/cloud-clipboard.git --branch golang
 cd cloud-clipboard/server-go/cloud-clip/
@@ -38,13 +38,16 @@ go build
 ## 2. Usage
 
 //2. run server:  
-- need manually create `config.json`  
-- need `./static` (link from server-node, no static resource in binary)  
-- need `./upload` folder 
+- ~~need manually create `config.json`~~  
+- ~~need `./static`~~ (~~link from server-node, no~~ static resource in binary)  
+- ~~need `./uploads` folder~~ 
 
-```bash
-ln -s ../server-node/static
-mkdir ./uploads
+<del>`
+ln -s ../server-node/static  
+mkdir ./uploads  
+`</del>
+
+```
 ./cloud-clip
 ```
 
