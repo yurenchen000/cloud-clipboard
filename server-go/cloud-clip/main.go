@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html"
 	"io"
@@ -378,24 +379,28 @@ func mkdir_uploads() {
 }
 
 //go:embed static
-var staticFS embed.FS
+var embed_static_fs embed.FS
+
+// specify external static folder
+var flg_external_static = flag.String("static", "", "Path to external static files, example ./static")
 
 func main() {
 	load_history()
 	mkdir_uploads() // mkdir -p uplodas
 
 	prefix := config.Server.Prefix
-	static_builtin := false
 
-	if static_builtin == true {
+	flag.Parse()
+
+	if *flg_external_static == "" {
 		// use builtin static
 		fmt.Println("== serve from builtin static")
-		fsys, _ := fs.Sub(staticFS, "static")
+		fsys, _ := fs.Sub(embed_static_fs, "static")
 		http.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.FS(fsys))))
 	} else {
-		fmt.Println("-- serve from external static")
+		fmt.Println("-- serve from external static:", *flg_external_static)
 		// use external static
-		http.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.Dir("./static"))))
+		http.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.Dir(*flg_external_static))))
 	}
 
 	// api
