@@ -8,6 +8,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	// "github.com/sanity-io/litter"
@@ -40,10 +41,12 @@ func load_config(config_path string) *Config {
 	// Read the config.json file_content
 	// file_content, err := ioutil.ReadFile("config.json")
 	file_content, err := os.ReadFile(config_path)
+	need_create := false
 	if err != nil {
 		fmt.Printf("Error reading config file: %v\n", err)
 		// os.Exit(1)
 		file_content = []byte("{}")
+		need_create = true
 	}
 
 	// Parse the JSON data into the Config struct
@@ -56,7 +59,8 @@ func load_config(config_path string) *Config {
 
 	// Set default values
 	if config.Server.Port == 0 {
-		config.Server.Port = 9501
+		// config.Server.Port = 9501
+		config.Server.Port = 8000
 	}
 
 	config.Server.Prefix = strings.TrimRight(config.Server.Prefix, "/")
@@ -78,10 +82,6 @@ func load_config(config_path string) *Config {
 		config.Server.Auth = false
 	}
 
-	if config.Server.Auth == false { // convert to ""
-		config.Server.Auth = ""
-	}
-
 	if config.Text.Limit == 0 {
 		config.Text.Limit = 4096
 	}
@@ -93,6 +93,24 @@ func load_config(config_path string) *Config {
 	}
 	if config.File.Limit == 0 {
 		config.File.Limit = 256 * _MB
+	}
+
+	if need_create {
+		// fmt.Println("create default config:")
+		// config_json, err := json.Marshal(config)
+		config_json, err := json.MarshalIndent(config, "", "\t")
+		if err == nil {
+			err = os.WriteFile(config_path, config_json, 0644)
+			if err != nil {
+				fmt.Printf("Error writing config file: %v\n", err)
+				// os.Exit(1)
+			}
+			log.Println("++ config.json created with default config")
+		}
+	}
+
+	if config.Server.Auth == false { // convert to ""
+		config.Server.Auth = ""
 	}
 
 	// Print the parsed configuration
