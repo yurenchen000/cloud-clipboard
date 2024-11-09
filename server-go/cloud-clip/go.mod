@@ -7,7 +7,7 @@ module github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip
 // replace cloud-clip => github.com/yurenchen000/cloud-clipboard/server-go go-1.3
 // replace cloud-clip => github.com/yurenchen000/cloud-clipboard/server-go v0.0.1
 
-go 1.22.7
+go 1.22
 
 require (
 	github.com/google/uuid v1.6.0
