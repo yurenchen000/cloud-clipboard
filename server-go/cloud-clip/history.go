@@ -39,12 +39,17 @@ var uploadFileMap = make(map[string]File)
 var messageQueue = &PostList{nextid: 0, history_len: config.Server.History}
 
 func _load_history(hist_path string) *History {
-	json_str, _ := os.ReadFile(hist_path)
+	json_bytes, _ := os.ReadFile(hist_path)
+	if len(json_bytes) == 0 {
+		log.Println("++ history.json is empty or non-exist, will create")
+		json_bytes = []byte("{}")
+	}
 
 	var payload History
-	err := json.Unmarshal([]byte(json_str), &payload)
+	err := json.Unmarshal([]byte(json_bytes), &payload)
 	if err != nil {
-		log.Fatalf("Error parsing JSON: %v", err)
+		// log.Fatalf("_load_history: Error parsing JSON: %v", err)
+		log.Fatalf("_load_history: Error parsing JSON: %v", err)
 	}
 
 	return &payload
