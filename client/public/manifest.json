@@ -1,7 +1,7 @@
 {
-    "name": "云剪贴板",
-    "description": "在局域网内互传纯文本和文件的云剪贴板，即开即用的网页版，无须安装 APP",
-    "short_name": "云剪贴板",
+    "name": "Cloud Clipboard",
+    "description": "Cloud Clipboard for transferring plain text and files within a LAN, a web-based version that is ready to use without the need to install an app.",
+    "short_name": "cloud_clip",
     "start_url": "./",
     "scope": ".",
     "display": "standalone",
