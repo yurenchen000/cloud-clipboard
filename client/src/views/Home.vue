@@ -59,10 +59,7 @@
             style="transform:translateY(-64px)"
         >
             <template v-slot:activator>
-                <v-btn @click="dialog = true; mode||='text';
-                    if(mode=='text')     setTimeout(() => $refs.dialogText.focus(), 300)
-                    else if(mode=='file')setTimeout(() => $refs.dialogFile.focus(), 300)
-                "
+                <v-btn @click="mode||='text'; dialog = true; focusDialog()"
                     v-model="fab"
                     fab
                     dark
@@ -101,10 +98,7 @@
                     <v-spacer></v-spacer>
                     <v-tooltip left>
                         <template v-slot:activator="{ on }">
-                            <v-btn icon v-on="on" @click="mode = mode === 'text' ? 'file' : 'text';
-                                if(mode=='text')     setTimeout(() => $refs.dialogText.focus(), 300)
-                                else if(mode=='file')setTimeout(() => $refs.dialogFile.focus(), 300)
-                            " >
+                            <v-btn icon v-on="on" @click="mode = mode === 'text' ? 'file' : 'text'; focusDialog()" >
                                 <v-icon v-if="mode === 'file'">{{mdiText}}</v-icon>
                                 <v-icon v-if="mode === 'text'">{{mdiFileDocumentOutline}}</v-icon>
                             </v-btn>
@@ -186,6 +180,12 @@ export default {
         },
         setTimeout(f, t) {
             return setTimeout(f, t);
+        },
+        focusDialog(){
+            switch (this.mode) {
+                case 'text': setTimeout(() => this.$refs.dialogText.focus(), 300); break;
+                case 'file': setTimeout(() => this.$refs.dialogFile.focus(), 300); break;
+            }
         },
     },
     watch: {
