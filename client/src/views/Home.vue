@@ -71,6 +71,16 @@
                     <v-toolbar-title v-if="mode === 'text'">发送文本</v-toolbar-title>
                     <v-toolbar-title v-if="mode === 'file'">发送文件</v-toolbar-title>
                     <v-spacer></v-spacer>
+                    <v-tooltip left>
+                        <template v-slot:activator="{ on }">
+                            <v-btn icon v-on="on" @click="mode = mode === 'text' ? 'file' : 'text'" >
+                                <v-icon v-if="mode === 'file'">{{mdiText}}</v-icon>
+                                <v-icon v-if="mode === 'text'">{{mdiFileDocumentOutline}}</v-icon>
+                            </v-btn>
+                        </template>
+                        <span v-if="mode === 'file'">发送文本</span>
+                        <span v-if="mode === 'text'">发送文件</span>
+                    </v-tooltip>
                 </v-toolbar>
                 <!-- content -->
                 <!-- 
