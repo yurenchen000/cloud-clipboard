@@ -1,11 +1,13 @@
 <template>
     <v-container>
         <v-row>
+            <!-- send panel //wide screen -->
             <v-col cols="12" md="4" class="hidden-sm-and-down">
                 <send-text></send-text>
                 <v-divider class="my-4"></v-divider>
                 <send-file></send-file>
             </v-col>
+            <!-- msg list -->
             <v-col cols="12" md="8">
                 <v-fade-transition group>
                     <div :is="`received-${item.type}`" v-for="item in $root.received" :key="item.id" :meta="item"></div>
@@ -14,6 +16,7 @@
             </v-col>
         </v-row>
 
+        <!-- float btn //narrow screen -->
         <v-speed-dial
             v-model="fab"
             bottom
@@ -41,15 +44,27 @@
                 <v-icon>{{mdiText}}</v-icon>
             </v-btn>
         </v-speed-dial>
+
+        <!-- send dialog //narrow screen -->
+        <!-- 
+            transition="dialog-top-transition"
+            
+            max-width="100%"
+            class="h-auto"
+            dialog-margin="0"
+            fullscreen
+            width="100%" 
+        -->
         <v-dialog
             v-model="dialog"
-            fullscreen
+            content-class="chen_bottom"
             hide-overlay
             transition="dialog-bottom-transition"
             scrollable
         >
             <v-card>
-                <v-toolbar dark color="primary" class="flex-grow-0">
+                <!-- title -->
+                <v-toolbar dark dense color="primary" class="flex-grow-0">
                     <v-btn icon @click="dialog = false">
                         <v-icon>{{mdiClose}}</v-icon>
                     </v-btn>
@@ -57,8 +72,12 @@
                     <v-toolbar-title v-if="mode === 'file'">发送文件</v-toolbar-title>
                     <v-spacer></v-spacer>
                 </v-toolbar>
+                <!-- content -->
+                <!-- 
+                class="my-4"
+                 -->
                 <v-card-text class="px-4">
-                    <div class="my-4">
+                    <div class="mt-4">
                         <send-text ref="dialogText" v-if="mode === 'text'"></send-text>
                         <send-file ref="dialogFile" v-if="mode === 'file'"></send-file>
                     </div>
@@ -67,6 +86,28 @@
         </v-dialog>
     </v-container>
 </template>
+
+
+<style scoped>
+
+/* 
+//---- work
+.v-dialog__content >>> .v-dialog { 
+>>> .v-dialog { 
+//----- not work
+.v-dialog {  
+v-dialog >>> .v-dialog {
+*/
+
+>>> .v-dialog {
+  margin: 0 !important;
+  color: red;
+}
+>>> .v-dialog.chen_bottom {
+    position: fixed;
+    bottom: 0;
+}
+</style>
 
 <script>
 import SendText from '@/components/SendText.vue';
