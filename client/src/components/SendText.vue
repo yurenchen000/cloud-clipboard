@@ -1,12 +1,18 @@
 <template>
     <div>
+        <!-- 
         <div class="headline text--primary mb-4">发送文本</div>
+        -->
+        <!-- 
+            no-resize
+            rows="6"
+        -->
         <v-textarea
             ref="textarea"
-            no-resize
+            auto-grow
             outlined
             dense
-            rows="6"
+            rows="3"
             :counter="$root.config.text.limit"
             placeholder="请输入需要发送的文本"
             v-model="$root.send.text"
