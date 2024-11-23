@@ -82,7 +82,7 @@
         -->
         <v-dialog
             v-model="dialog"
-            content-class="chen_bottom"
+            :content-class="['chen_bottom', fullDialog?'chen_full':''].join(' ')"
             hide-overlay
             transition="dialog-bottom-transition"
             scrollable
@@ -96,6 +96,16 @@
                     <v-toolbar-title v-if="mode === 'text'">发送文本</v-toolbar-title>
                     <v-toolbar-title v-if="mode === 'file'">发送文件</v-toolbar-title>
                     <v-spacer></v-spacer>
+
+                    <v-tooltip left>
+                        <template v-slot:activator="{ on }">
+                            <v-btn icon v-on="on" @click="fullDialog=!fullDialog;" >
+                                <v-icon >{{mdiFullscreen}}</v-icon>
+                            </v-btn>
+                        </template>
+                        <span>fullscreen</span>
+                    </v-tooltip>
+
                     <v-tooltip left>
                         <template v-slot:activator="{ on }">
                             <v-btn icon v-on="on" @click="mode = mode === 'text' ? 'file' : 'text'; focusDialog()" >
@@ -142,6 +152,11 @@ v-dialog >>> .v-dialog {
     position: fixed;
     bottom: 0;
 }
+>>> .v-dialog.chen_full {
+    height: 100%;
+    max-height: unset;
+}
+
 </style>
 
 <script>
@@ -154,6 +169,7 @@ import {
     mdiFileDocumentOutline,
     mdiText,
     mdiClose,
+    mdiFullscreen,
 } from '@mdi/js';
 
 export default {
@@ -168,10 +184,12 @@ export default {
             fab: false,
             dialog: false,
             mode: null,
+            fullDialog: false,
             mdiPlus,
             mdiFileDocumentOutline,
             mdiText,
             mdiClose,
+            mdiFullscreen,
         };
     },
     methods: {
