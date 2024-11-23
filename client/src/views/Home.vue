@@ -17,6 +17,7 @@
         </v-row>
 
         <!-- float btn //narrow screen -->
+        <!-- 
         <v-speed-dial
             v-model="fab"
             bottom
@@ -43,6 +44,30 @@
             <v-btn fab dark small color="primary" @click="dialog = true; mode = 'text'; setTimeout(() => $refs.dialogText.focus(), 300)">
                 <v-icon>{{mdiText}}</v-icon>
             </v-btn>
+        </v-speed-dial>
+        -->
+
+        <!--  float single  -->
+        <v-speed-dial
+            v-model="fab"
+            bottom
+            right
+            fixed
+            direction="top"
+            transition="scale-transition"
+            class="hidden-md-and-up"
+            style="transform:translateY(-64px)"
+        >
+            <template v-slot:activator>
+                <v-btn @click="dialog = true; mode||='text';"
+                    v-model="fab"
+                    fab
+                    dark
+                    color="primary"
+                >
+                    <v-icon>{{mdiPlus}}</v-icon>
+                </v-btn>
+            </template>
         </v-speed-dial>
 
         <!-- send dialog //narrow screen -->
