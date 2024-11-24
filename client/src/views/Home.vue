@@ -100,10 +100,17 @@
                     <v-tooltip left>
                         <template v-slot:activator="{ on }">
                             <v-btn icon v-on="on" @click="fullDialog=!fullDialog;" >
+                                <!-- 
                                 <v-icon >{{mdiFullscreen}}</v-icon>
+                                <v-icon v-if="!fullDialog">{{mdiArrowCollapseUp}}</v-icon>
+                                <v-icon v-if=" fullDialog">{{mdiArrowExpandDown}}</v-icon>
+                                 -->
+                                <v-icon v-if="!fullDialog">{{mdiChevronDoubleUp}}</v-icon>
+                                <v-icon v-if=" fullDialog">{{mdiChevronDoubleDown}}</v-icon>
                             </v-btn>
                         </template>
-                        <span>fullscreen</span>
+                        <span v-if="!fullDialog">fullscreen</span>
+                        <span v-if=" fullDialog">dialog</span>
                     </v-tooltip>
 
                     <v-tooltip left>
@@ -170,6 +177,13 @@ import {
     mdiText,
     mdiClose,
     mdiFullscreen,
+    mdiArrowExpandUp,
+    mdiArrowCollapseDown,
+    mdiArrowCollapseUp,
+    mdiArrowExpandDown,
+    mdiChevronDoubleUp,
+    mdiChevronDoubleDown,
+    mdiSend,
 } from '@mdi/js';
 
 export default {
@@ -190,6 +204,13 @@ export default {
             mdiText,
             mdiClose,
             mdiFullscreen,
+            mdiArrowExpandUp,
+            mdiArrowCollapseDown,
+            mdiArrowCollapseUp,
+            mdiArrowExpandDown,
+            mdiChevronDoubleUp,
+            mdiChevronDoubleDown,
+            mdiSend,
         };
     },
     methods: {
