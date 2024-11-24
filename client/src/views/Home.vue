@@ -3,9 +3,9 @@
         <v-row>
             <!-- send panel //wide screen -->
             <v-col cols="12" md="4" class="hidden-sm-and-down">
-                <send-text></send-text>
+                <send-text ref="send_text"></send-text>
                 <v-divider class="my-4"></v-divider>
-                <send-file></send-file>
+                <send-file ref="send_file"></send-file>
             </v-col>
             <!-- msg list -->
             <v-col cols="12" md="8">
@@ -129,6 +129,32 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
+
+
+        <!-- chat input -->
+        <div class="chat_input hidden-md-and-up elevation-24">
+            <v-row dense>
+                <v-col >
+                    <v-textarea
+                        ref="textarea"
+                        auto-grow
+                        outlined
+                        dense
+                        rows="1"
+                        :counter="$root.config.text.limit"
+                        placeholder="请输入需要发送的文本"
+                        v-model="$root.send.text"
+                    ></v-textarea>
+                </v-col>
+
+                <v-col cols="auto">
+                    <v-btn icon @click="$refs.send_text.send()">
+                        <v-icon>{{mdiSend}}</v-icon>
+                    </v-btn>
+                </v-col>
+            </v-row>
+        </div>
+
     </v-container>
 </template>
 
@@ -157,6 +183,18 @@ v-dialog >>> .v-dialog {
     max-height: unset;
 }
 
+>>> .chat_input {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.theme--dark .chat_input {
+    background-color: darkslategrey;
+}
+.theme--light .chat_input {
+    background-color: honeydew;
+}
 </style>
 
 <script>
@@ -170,6 +208,7 @@ import {
     mdiText,
     mdiClose,
     mdiFullscreen,
+    mdiSend,
 } from '@mdi/js';
 
 export default {
@@ -190,6 +229,7 @@ export default {
             mdiText,
             mdiClose,
             mdiFullscreen,
+            mdiSend,
         };
     },
     methods: {
