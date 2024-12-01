@@ -7,6 +7,7 @@ import (
 	// "compress/zstd"
 	"compress/gzip"
 
+	"github.com/andybalholm/brotli"
 	"github.com/klauspost/compress/zstd"
 
 	"embed"
@@ -97,12 +98,21 @@ func server_static(prefix string) {
 	}
 }
 
-// compressionMiddleware adds support for `Content-Encoding: zstd` and `gzip`.
+// compressionMiddleware adds support for `Content-Encoding: zstd`, `gzip`, and `br` (Brotli).
 func compressionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		acceptEncoding := r.Header.Get("Accept-Encoding")
 
-		if strings.Contains(acceptEncoding, "zstd") {
+		if strings.Contains(acceptEncoding, "br") {
+			// Handle Brotli encoding
+			encoder := brotli.NewWriter(w)
+			defer encoder.Close()
+
+			w.Header().Set("Content-Encoding", "br")
+			w.Header().Del("Content-Length") // Content length cannot be known with compression
+			next.ServeHTTP(&compressedResponseWriter{ResponseWriter: w, writer: encoder}, r)
+			return
+		} else if strings.Contains(acceptEncoding, "zstd") {
 			// Handle zstd encoding
 			encoder, err := zstd.NewWriter(w)
 			if err != nil {
