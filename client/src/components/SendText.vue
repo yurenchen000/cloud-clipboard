@@ -6,13 +6,14 @@
         <!-- 
             no-resize
             rows="6"
+            rows="3"
         -->
         <v-textarea
             ref="textarea"
             auto-grow
             outlined
             dense
-            rows="3"
+            :rows="$vuetify.breakpoint.xs ? 3 : 6"
             :counter="$root.config.text.limit"
             placeholder="请输入需要发送的文本"
             v-model="$root.send.text"
