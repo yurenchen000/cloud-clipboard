@@ -83,6 +83,6 @@ new Vue({
         setInterval(() => {
             this.date = new Date;
             this.$vuetify.theme.dark = this.useDark;
-        }, 1000);
+        }, 10000); //reduce timer
     },
 }).$mount('#app');
