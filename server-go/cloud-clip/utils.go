@@ -18,6 +18,8 @@ import (
 	_ "image/gif"
 	_ "image/png"
 
+	_ "golang.org/x/image/webp"
+
 	"net"
 	"net/http"
 	"os"
