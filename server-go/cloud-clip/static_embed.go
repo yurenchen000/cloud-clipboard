@@ -4,6 +4,9 @@
 package main
 
 import (
+	// "compress/zstd"
+	"github.com/klauspost/compress/zstd"
+
 	"embed"
 	"flag"
 	"fmt"
@@ -86,6 +89,42 @@ func server_static(prefix string) {
 	} else {
 		fmt.Println("-- serve from external static:", *flg_external_static)
 		// use external static
-		http.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.Dir(*flg_external_static))))
+		// http.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.Dir(*flg_external_static))))
+		http.Handle(prefix+"/", http.StripPrefix(prefix, zstdMiddleware(http.FileServer(http.Dir(*flg_external_static)))))
 	}
+}
+
+// zstdMiddleware adds support for `Content-Encoding: zstd`.
+func zstdMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check if the client supports zstd encoding
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "zstd") {
+			// Create a zstd writer
+			encoder, err := zstd.NewWriter(w)
+			if err != nil {
+				http.Error(w, "failed to create zstd writer", http.StatusInternalServerError)
+				return
+			}
+			defer encoder.Close()
+
+			// Wrap the response writer to use zstd compression
+			w.Header().Set("Content-Encoding", "zstd")
+			w.Header().Del("Content-Length") // Content length cannot be known with compression
+			next.ServeHTTP(&zstdResponseWriter{ResponseWriter: w, writer: encoder}, r)
+			return
+		}
+
+		// Fallback to normal handler if zstd is not supported
+		next.ServeHTTP(w, r)
+	})
+}
+
+// zstdResponseWriter wraps the standard ResponseWriter to support zstd compression.
+type zstdResponseWriter struct {
+	http.ResponseWriter
+	writer *zstd.Encoder
+}
+
+func (zrw *zstdResponseWriter) Write(b []byte) (int, error) {
+	return zrw.writer.Write(b)
 }
