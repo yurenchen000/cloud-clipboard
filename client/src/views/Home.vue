@@ -79,11 +79,11 @@
             dialog-margin="0"
             fullscreen
             width="100%" 
+            hide-overlay
         -->
         <v-dialog
             v-model="dialog"
             :content-class="['chen_bottom', fullDialog?'chen_full':''].join(' ')"
-            hide-overlay
             transition="dialog-bottom-transition"
             scrollable
         >
