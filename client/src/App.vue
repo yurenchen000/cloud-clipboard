@@ -133,7 +133,7 @@
             dark
         >
             <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-            <v-toolbar-title>{{ $t('cloudClipboard') }}<span class="d-none d-sm-inline" v-if="$root.room">（{{ $t('room') }}：<abbr title="点击复制" style="cursor:pointer" @click="navigator.clipboard.writeText($root.room).then(() => $toast(`已复制房间名称：${$root.room}`).catch(err => $toast.error(`复制失败：${err}`)))">{{$root.room}}</abbr>）</span></v-toolbar-title>
+            <v-toolbar-title>{{ $t('cloudClipboard') }}<span class="d-none d-sm-inline" v-if="$root.room">（{{ $t('room') }}：<abbr title="{{ $t('clickToCopy') }}" style="cursor:pointer" @click="navigator.clipboard.writeText($root.room).then(() => $toast(`${$t('roomNameCopied')}: ${$root.room}`).catch(err => $toast.error(`${$t('copyFailed')}: ${err}`)))">{{$root.room}}</abbr>）</span></v-toolbar-title>
             <v-spacer></v-spacer>
             <v-tooltip left>
                 <template v-slot:activator="{ on }">
@@ -177,7 +177,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="primary" text @click="colorDialog = false">确定</v-btn>
+                    <v-btn color="primary" text @click="colorDialog = false">{{ $t('pickOK') }}</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>

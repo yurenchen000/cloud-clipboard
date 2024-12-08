@@ -44,7 +44,7 @@ export default {
     methods: {
         connect() {
             this.websocketConnecting = true;
-            this.$toast(this.retry ? `未能连接到服务器，正在尝试第 ${this.retry} 次重连……` : '正在连接服务器……', {
+            this.$toast(this.retry ? this.$t('isReConnecting', {retry: this.retry}) : this.$t('isConnecting'), {
                 showClose: false,
                 dismissable: false,
                 timeout: 0,
@@ -73,7 +73,7 @@ export default {
                 this.websocketConnecting = false;
                 this.retry = 0;
                 this.received = [];
-                this.$toast('连接服务器成功');
+                this.$toast(this.$t('connectSuccess'));
                 setInterval(() => {ws.send('')}, 30000);
                 ws.onclose = () => {this.failure()};
                 ws.onmessage = e => {
@@ -102,7 +102,7 @@ export default {
             if (this.retry++ < 3) {
                 this.connect();
             } else {
-                this.$toast.error('连接服务器失败，请点击工具栏上的“连接”图标重试', {
+                this.$toast.error(this.$t('connectFailed_clickToConnect'), {
                     showClose: false,
                     dismissable: false,
                     timeout: 0,
