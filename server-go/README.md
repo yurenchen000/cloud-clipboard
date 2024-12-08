@@ -52,3 +52,8 @@ mkdir ./uploads
 ./cloud-clip
 ```
 
+## 3. Nginx
+
+nginx conf demo `demo1.ngx`  
+with https
+
