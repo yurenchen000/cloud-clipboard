@@ -31,5 +31,9 @@ FLAGS= -ldflags='-s -w -X main.server_version=${VER}'
 cloud-clip: *.go Makefile
 	go build -o $@ $(FLAGS)
 
+# bundle with static/
+cloud-clip.embed: *.go Makefile
+	go build -o $@ $(FLAGS) --tags embed
+
 clean:
 	rm -f cloud-clip
