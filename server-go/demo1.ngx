@@ -1,0 +1,55 @@
+
+# forward cloud-clip
+server {
+    listen       80;
+    server_name  YOUR_DOMAIN_NAME;
+
+    proxy_read_timeout 300;
+    client_max_body_size 256M;
+
+    location / { 
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # client ip
+        proxy_set_header X-Real-Ip $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        #proxy_set_header REMOTE_ADDR $remote_addr;
+        proxy_set_header "proxy_sec" "your secure";
+
+        proxy_pass http://127.0.0.1:8000;
+    }
+}
+
+
+server {
+    listen       443 ssl;
+    server_name  YOUR_DOMAIN_NAME;
+
+    ssl_certificate     /etc/nginx/cert/YOUR_DOMAIN.crt;
+    ssl_certificate_key /etc/nginx/cert/YOUR_DOMAIN.key;
+
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers         'HIGH:!aNULL:!MD5';
+
+    proxy_read_timeout 600;
+    client_max_body_size 256M;
+
+    location / {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Real-Port $remote_port;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_set_header X-NginX-Proxy true;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_pass http://127.0.0.1:8000;
+    }
+}
+
