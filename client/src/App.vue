@@ -171,6 +171,21 @@
     </v-app>
 </template>
 
+<!-- will filter by data-v-xxx -->
+<style scoped>
+.v-navigation-drawer >>> .v-navigation-drawer__border {
+    pointer-events: none;
+}
+</style>
+
+<!-- not filter by data-v-xxx -->
+<style>
+/* global style */
+.v-snack.v-snack--bottom {
+    bottom: 30%;
+}
+</style>
+
 <script>
 import {
     mdiContentPaste,

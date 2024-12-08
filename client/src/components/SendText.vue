@@ -1,11 +1,19 @@
 <template>
     <div>
+        <!-- 
         <div class="headline text--primary mb-4">发送文本</div>
-        <v-textarea
+        -->
+        <!-- 
             no-resize
+            rows="6"
+            rows="3"
+        -->
+        <v-textarea
+            ref="textarea"
+            auto-grow
             outlined
             dense
-            rows="6"
+            :rows="$vuetify.breakpoint.xs ? 3 : 6"
             :counter="$root.config.text.limit"
             placeholder="请输入需要发送的文本"
             v-model="$root.send.text"
@@ -25,6 +33,9 @@
 export default {
     name: 'send-text',
     methods: {
+        focus() {
+            this.$refs.textarea.focus();
+        },
         send() {
             this.$http.post(
                 'text',
