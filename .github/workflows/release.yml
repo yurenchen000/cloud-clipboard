@@ -48,6 +48,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         # goos: linux
         # goarch: amd64
+        build_flags: -tags embed
         ldflags: -s -w -X main.server_version=${{github.event.release.tag_name}}
         goversion: 1.22
         goos: ${{ matrix.goos }}
