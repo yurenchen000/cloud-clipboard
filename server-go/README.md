@@ -4,9 +4,7 @@
 
 [![build](https://github.com/yurenchen000/cloud-clipboard/actions/workflows/release.yml/badge.svg)](https://github.com/yurenchen000/cloud-clipboard/releases)
 
-<!-- not work
-[![go-report](https://goreportcard.com/badge/github.com/yurenchen000/cloud-clipboard)](https://goreportcard.com/report/github.com/yurenchen000/cloud-clipboard)
--->
+[![Go Report Card](https://goreportcard.com/badge/github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip)](https://goreportcard.com/report/github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip)
 
 [![release](https://img.shields.io/github/v/release/yurenchen000/cloud-clipboard)](https://github.com/yurenchen000/cloud-clipboard/releases)
 
