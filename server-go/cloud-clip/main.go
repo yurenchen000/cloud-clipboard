@@ -246,7 +246,8 @@ func handle_push(w http.ResponseWriter, r *http.Request) {
 	config_event_json, _ := json.Marshal(config_event)
 	ws.WriteMessage(websocket.TextMessage, config_event_json)
 
-	ws_send_history(ws, room)
+	// ws_send_history(ws, room)
+	ws_send_history_multi(ws, room)
 	deviceID, room := ws_send_devices(r, ws)
 
 	for { //--- msg loop, recv no action
