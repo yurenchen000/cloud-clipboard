@@ -28,6 +28,7 @@ export default {
                     this.$root.received.splice(index, 1);
                 },
                 config: data => {
+                    this.retry = 0; //real success login
                     this.$root.config = data;
                     console.log(
                         `%c Cloud Clipboard ${data.version} by TransparentLC %c https://github.com/TransparentLC/cloud-clipboard `,
@@ -46,6 +47,7 @@ export default {
                 forbidden: () => {
                     this.authCode = '';
                     localStorage.removeItem('auth');
+                    localStorage.setItem('need_auth', true);
                 },
             },
         };
@@ -73,7 +75,7 @@ export default {
                         return resolve({
                           data: {//guess server config
                             server: location.origin.replace(/^http/,'ws')+'/push',
-                            auth: !!localStorage.getItem('auth'),
+                            auth: !!(localStorage.getItem('auth') || localStorage.getItem('need_auth')),
                             status: 200,
                           }
                         })
@@ -107,7 +109,7 @@ export default {
                 });
             }).then((/** @type {WebSocket} */ ws) => {
                 this.websocketConnecting = false;
-                this.retry = 0;
+                // this.retry = 0;
                 this.received = [];
                 console.log('2. ack push:', performance.now())
                 this.$toast(this.$t('connectSuccess'));
