@@ -189,6 +189,8 @@ func handle_finish(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{})
 }
 
+var flg_compatible = flag.Bool("compatible", false, "Try to be compatible with upstream client UI (will disable some incompatible features)")
+
 func handle_push(w http.ResponseWriter, r *http.Request) {
 	room := r.URL.Query().Get("room")
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -247,8 +249,11 @@ func handle_push(w http.ResponseWriter, r *http.Request) {
 	ws.WriteMessage(websocket.TextMessage, config_event_json)
 
 	// ws_send_history(ws, room)
-	// ws_send_history_multi(ws, room)
-	ws_send_history_multi2(ws, room)
+	if *flg_compatible {
+		ws_send_history_multi(ws, room)
+	} else {
+		ws_send_history_multi2(ws, room) //this feature not compatible with upstream client ui
+	}
 	deviceID, room := ws_send_devices(r, ws)
 
 	for { //--- msg loop, recv no action
