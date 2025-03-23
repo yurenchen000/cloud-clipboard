@@ -10,11 +10,17 @@ export default {
             roomDialog: false,
             retry: 0,
             event: {
+                //add to latest
                 receive: data => {
                     this.$root.received.unshift(data);
                 },
+                //add to latest, data item old first
                 receiveMulti: data => {
                     this.$root.received.unshift(...Array.from(data).reverse());
+                },
+                //add to oldest, data item old first
+                receiveMultiOld: data => {
+                    this.$root.received.push(...Array.from(data).reverse());
                 },
                 revoke: data => {
                     let index = this.$root.received.findIndex(e => e.id === data.id);
