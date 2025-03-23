@@ -59,7 +59,7 @@ func ws_send_history(ws *websocket.Conn, room string) {
 }
 
 func ws_send_history_multi(ws *websocket.Conn, room string) {
-	fmt.Println("== send hist:", ws.RemoteAddr(), room)
+	fmt.Println("== send hist multi:", ws.RemoteAddr(), room)
 	var posts = PostEventMulti{Event: "receiveMulti"}
 	// posts.Data list
 	for _, message := range messageQueue.List {
@@ -118,7 +118,7 @@ func ws_send_history_multi2(ws *websocket.Conn, room string) {
 	var filteredList []PostEvent
 	filteredList = Filter(messageQueue.List, func(msg PostEvent) bool { return msg.Data.Room() == room })
 
-	fmt.Println("== send hist:", ws.RemoteAddr(), room)
+	fmt.Println("== send hist multi2:", ws.RemoteAddr(), room)
 
 	splitIndex := len(filteredList) - 15
 	if splitIndex < 0 {
