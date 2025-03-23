@@ -79,14 +79,32 @@ func ws_send_history_multi(ws *websocket.Conn, room string) {
 	ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
 }
 
+// Filter returns a new slice containing only elements that match the predicate
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+	result := make([]T, 0, len(slice))
+	for _, item := range slice {
+		if predicate(item) {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// Map transforms each element of the slice using the mapper function
+func Map[T any, R any](slice []T, mapper func(T) R) []R {
+	result := make([]R, 0, len(slice))
+	for _, item := range slice {
+		result = append(result, mapper(item))
+	}
+	return result
+}
+
 func ws_send_history_multi2(ws *websocket.Conn, room string) {
 	// 0. filter list
 	var filteredList []PostEvent
-	for _, message := range messageQueue.List {
-		if message.Data.Room() == room {
-			filteredList = append(filteredList, message)
-		}
-	}
+	filteredList = Filter(messageQueue.List, func(msg PostEvent) bool {
+		return msg.Data.Room() == room
+	})
 
 	// // A. send all in one
 	// if len(filteredList) < 20 {
@@ -102,13 +120,9 @@ func ws_send_history_multi2(ws *websocket.Conn, room string) {
 
 	// 1. latest first
 	var posts = PostEventMulti{Event: "receiveMulti"}
-	for _, message := range list_news {
-		fmt.Println("--hist msg:", message)
-		if message.Data.Room() == room { //msg: {event,data}
-			posts.Data = append(posts.Data, *&message.Data)
-		}
-	}
-
+	posts.Data = Map(list_news, func(msg PostEvent) ReceiveHolder {
+		return msg.Data
+	})
 	messageJSON, err := json.Marshal(posts)
 	if err != nil {
 		fmt.Println("无法编码消息")
@@ -120,12 +134,9 @@ func ws_send_history_multi2(ws *websocket.Conn, room string) {
 
 	// 2. history later
 	posts = PostEventMulti{Event: "receiveMultiOld"}
-	for _, message := range list_hist {
-		fmt.Println("--hist msg:", message)
-		if message.Data.Room() == room { //msg: {event,data}
-			posts.Data = append(posts.Data, *&message.Data)
-		}
-	}
+	posts.Data = Map(list_hist, func(msg PostEvent) ReceiveHolder {
+		return msg.Data
+	})
 
 	messageJSON, err = json.Marshal(posts)
 	if err != nil {
