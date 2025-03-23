@@ -43,7 +43,7 @@ func broadcast_ws_msg(ws_list map[*websocket.Conn]bool, message string, room str
 // send messageQueue to a ws
 func ws_send_history(ws *websocket.Conn, room string) {
 	fmt.Println("== send hist:", ws.RemoteAddr(), room)
-	for _, message := range messageQueue.List {
+	for _, message := range messageQueue.List { //msg: {event,data}
 		fmt.Println("--hist msg:", message)
 		// if message["data"].(map[string]interface{})["room"] == room {
 		if message.Data.Room() == room {
@@ -56,6 +56,27 @@ func ws_send_history(ws *websocket.Conn, room string) {
 			ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
 		}
 	}
+}
+
+func ws_send_history_multi(ws *websocket.Conn, room string) {
+	fmt.Println("== send hist:", ws.RemoteAddr(), room)
+	var posts = PostEventMulti{Event: "receiveMulti"}
+	// posts.Data list
+	for _, message := range messageQueue.List {
+		fmt.Println("--hist msg:", message)
+		// if message["data"].(map[string]interface{})["room"] == room {
+		if message.Data.Room() == room { //msg: {event,data}
+			posts.Data = append(posts.Data, *&message.Data)
+		}
+	}
+
+	messageJSON, err := json.Marshal(posts)
+	if err != nil {
+		fmt.Println("无法编码消息")
+		return
+	}
+	messageStr := string(messageJSON)
+	ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
 }
 
 // send deviceConnected[] to websockets[]
