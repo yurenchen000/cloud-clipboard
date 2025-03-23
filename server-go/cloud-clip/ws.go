@@ -79,6 +79,63 @@ func ws_send_history_multi(ws *websocket.Conn, room string) {
 	ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
 }
 
+func ws_send_history_multi2(ws *websocket.Conn, room string) {
+	// 0. filter list
+	var filteredList []PostEvent
+	for _, message := range messageQueue.List {
+		if message.Data.Room() == room {
+			filteredList = append(filteredList, message)
+		}
+	}
+
+	// // A. send all in one
+	// if len(filteredList) < 20 {
+	// 	ws_send_history_multi(ws, room)
+	// 	return
+	// }
+
+	fmt.Println("== send hist:", ws.RemoteAddr(), room)
+
+	splitIndex := len(filteredList) - 15
+	list_hist := filteredList[:splitIndex] // All elements except last 15
+	list_news := filteredList[splitIndex:] // Last 15 elements
+
+	// 1. latest first
+	var posts = PostEventMulti{Event: "receiveMulti"}
+	for _, message := range list_news {
+		fmt.Println("--hist msg:", message)
+		if message.Data.Room() == room { //msg: {event,data}
+			posts.Data = append(posts.Data, *&message.Data)
+		}
+	}
+
+	messageJSON, err := json.Marshal(posts)
+	if err != nil {
+		fmt.Println("无法编码消息")
+		return
+	}
+	messageStr := string(messageJSON)
+	ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
+	// time.Sleep(time.Second * 2)
+
+	// 2. history later
+	posts = PostEventMulti{Event: "receiveMultiOld"}
+	for _, message := range list_hist {
+		fmt.Println("--hist msg:", message)
+		if message.Data.Room() == room { //msg: {event,data}
+			posts.Data = append(posts.Data, *&message.Data)
+		}
+	}
+
+	messageJSON, err = json.Marshal(posts)
+	if err != nil {
+		fmt.Println("无法编码消息")
+		return
+	}
+	messageStr = string(messageJSON)
+	ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
+}
+
 // send deviceConnected[] to websockets[]
 func ws_send_devices(r *http.Request, ws *websocket.Conn) (string, string) {
 	room := r.URL.Query().Get("room")
