@@ -6,7 +6,7 @@
             app
         >
             <v-list>
-                <v-list-item link href="#/">
+                <v-list-item link :href="`#/?room=${$root.room}`">
                     <v-list-item-action>
                         <v-icon>{{mdiContentPaste}}</v-icon>
                     </v-list-item-action>
@@ -227,10 +227,8 @@
                         color="primary darken-1"
                         text
                         @click="
-                            $root.room = $root.roomInput;
+                            $router.push({ path: '/', query: { room: $root.roomInput }});
                             $root.roomDialog = false;
-                            $root.disconnect();
-                            $root.connect();
                         "
                     >{{ $t('enterRoom') }}</v-btn>
                 </v-card-actions>
