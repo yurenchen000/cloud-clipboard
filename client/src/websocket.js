@@ -64,9 +64,30 @@ export default {
                 dismissable: false,
                 timeout: 0,
             });
-            this.$http.get('server').then(response => {
+            console.log('0. req server:', performance.now())
+
+            // A fake_http just skip get /server
+            const fake_server = {
+                get(url){
+                    return new Promise((resolve, reject) => {
+                        return resolve({
+                          data: {//guess server config
+                            server: location.origin.replace(/^http/,'ws')+'/push',
+                            auth: !!localStorage.getItem('auth'),
+                            status: 200,
+                          }
+                        })
+                        //fake http never reject
+                    });
+                }
+            };
+
+            let skip_server = true;
+            // this.$http.get('server').then(response => {
+            (skip_server? fake_server: this.$http).get('server').then(response => {
                 if (this.authCode) localStorage.setItem('auth', this.authCode);
                 return new Promise((resolve, reject) => {
+                    console.log('1. ack server:', performance.now())
                     const wsUrl = new URL(response.data.server);
                     wsUrl.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
                     wsUrl.port = location.port;
@@ -79,6 +100,7 @@ export default {
                         }
                     }
                     wsUrl.searchParams.set('room', this.room);
+                    console.log('1. req push:', performance.now())
                     const ws = new WebSocket(wsUrl);
                     ws.onopen = () => resolve(ws);
                     ws.onerror = reject;
@@ -87,6 +109,7 @@ export default {
                 this.websocketConnecting = false;
                 this.retry = 0;
                 this.received = [];
+                console.log('2. ack push:', performance.now())
                 this.$toast(this.$t('connectSuccess'));
                 setInterval(() => {ws.send('')}, 30000);
                 ws.onclose = () => {this.failure()};
