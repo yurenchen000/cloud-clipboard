@@ -5,13 +5,22 @@ export default {
             websocketConnecting: false,
             authCode: localStorage.getItem('auth') || '',
             authCodeDialog: false,
-            room: localStorage.getItem('room') || '',
+            room: this.$router.currentRoute.query.room || '',
             roomInput: '',
             roomDialog: false,
             retry: 0,
             event: {
+                //add to latest
                 receive: data => {
                     this.$root.received.unshift(data);
+                },
+                //add to latest, data item old first
+                receiveMulti: data => {
+                    this.$root.received.unshift(...Array.from(data).reverse());
+                },
+                //add to oldest, data item old first
+                receiveMultiOld: data => {
+                    this.$root.received.push(...Array.from(data).reverse());
                 },
                 revoke: data => {
                     let index = this.$root.received.findIndex(e => e.id === data.id);
@@ -19,6 +28,7 @@ export default {
                     this.$root.received.splice(index, 1);
                 },
                 config: data => {
+                    this.retry = 0; //real success login
                     this.$root.config = data;
                     console.log(
                         `%c Cloud Clipboard ${data.version} by TransparentLC %c https://github.com/TransparentLC/cloud-clipboard `,
@@ -37,9 +47,16 @@ export default {
                 forbidden: () => {
                     this.authCode = '';
                     localStorage.removeItem('auth');
+                    localStorage.setItem('need_auth', true);
                 },
             },
         };
+    },
+    watch: {
+        room() {
+            this.disconnect();
+            this.connect();
+        },
     },
     methods: {
         connect() {
@@ -49,13 +66,33 @@ export default {
                 dismissable: false,
                 timeout: 0,
             });
-            this.$http.get('server').then(response => {
+            console.log('0. req server:', performance.now())
+
+            // A fake_http just skip get /server
+            const fake_server = {
+                get(url){
+                    return new Promise((resolve, reject) => {
+                        return resolve({
+                          data: {//guess server config
+                            server: location.origin.replace(/^http/,'ws')+'/push',
+                            auth: !!(localStorage.getItem('auth') || localStorage.getItem('need_auth')),
+                            status: 200,
+                          }
+                        })
+                        //fake http never reject
+                    });
+                }
+            };
+
+            let skip_server = true;
+            // this.$http.get('server').then(response => {
+            (skip_server? fake_server: this.$http).get('server').then(response => {
                 if (this.authCode) localStorage.setItem('auth', this.authCode);
-                this.room = this.room.trim();
-                localStorage.setItem('room', this.room);
                 return new Promise((resolve, reject) => {
+                    console.log('1. ack server:', performance.now())
                     const wsUrl = new URL(response.data.server);
                     wsUrl.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    wsUrl.port = location.port;
                     if (response.data.auth) {
                         if (this.authCode) {
                             wsUrl.searchParams.set('auth', this.authCode);
@@ -65,14 +102,16 @@ export default {
                         }
                     }
                     wsUrl.searchParams.set('room', this.room);
+                    console.log('1. req push:', performance.now())
                     const ws = new WebSocket(wsUrl);
                     ws.onopen = () => resolve(ws);
                     ws.onerror = reject;
                 });
             }).then((/** @type {WebSocket} */ ws) => {
                 this.websocketConnecting = false;
-                this.retry = 0;
+                // this.retry = 0;
                 this.received = [];
+                console.log('2. ack push:', performance.now())
                 this.$toast(this.$t('connectSuccess'));
                 setInterval(() => {ws.send('')}, 30000);
                 ws.onclose = () => {this.failure()};
@@ -91,9 +130,11 @@ export default {
         },
         disconnect() {
             this.websocketConnecting = false;
-            this.websocket.onclose = () => {};
-            this.websocket.close();
-            this.websocket = null;
+            if (this.websocket) {
+                this.websocket.onclose = () => {};
+                this.websocket.close();
+                this.websocket = null;
+            }
             this.$root.device = [];
         },
         failure() {

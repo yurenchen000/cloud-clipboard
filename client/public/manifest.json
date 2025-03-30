@@ -2,7 +2,6 @@
     "name": "Cloud Clipboard",
     "description": "Cloud Clipboard for transferring plain text and files within a LAN, a web-based version that is ready to use without the need to install an app.",
     "short_name": "cloud_clip",
-    "start_url": "./",
     "scope": ".",
     "display": "standalone",
     "icons": [
