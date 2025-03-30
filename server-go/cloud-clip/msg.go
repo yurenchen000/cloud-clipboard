@@ -11,6 +11,10 @@ type PostEvent struct {
 	Event string        `json:"event"`
 	Data  ReceiveHolder `json:"data"`
 }
+type PostEventMulti struct {
+	Event string          `json:"event"`
+	Data  []ReceiveHolder `json:"data"`
+}
 
 type PostList struct {
 	sync.Mutex

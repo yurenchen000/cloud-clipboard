@@ -43,7 +43,7 @@ func broadcast_ws_msg(ws_list map[*websocket.Conn]bool, message string, room str
 // send messageQueue to a ws
 func ws_send_history(ws *websocket.Conn, room string) {
 	fmt.Println("== send hist:", ws.RemoteAddr(), room)
-	for _, message := range messageQueue.List {
+	for _, message := range messageQueue.List { //msg: {event,data}
 		fmt.Println("--hist msg:", message)
 		// if message["data"].(map[string]interface{})["room"] == room {
 		if message.Data.Room() == room {
@@ -55,6 +55,85 @@ func ws_send_history(ws *websocket.Conn, room string) {
 			messageStr := string(messageJSON)
 			ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
 		}
+	}
+}
+
+func ws_send_history_multi(ws *websocket.Conn, room string) {
+	fmt.Println("== send hist multi:", ws.RemoteAddr(), room)
+	var posts = PostEventMulti{Event: "receiveMulti"}
+	// posts.Data list
+	for _, message := range messageQueue.List {
+		fmt.Println("--hist msg:", message)
+		// if message["data"].(map[string]interface{})["room"] == room {
+		if message.Data.Room() == room { //msg: {event,data}
+			posts.Data = append(posts.Data, *&message.Data)
+		}
+	}
+
+	messageJSON, err := json.Marshal(posts)
+	if err != nil {
+		fmt.Println("无法编码消息")
+		return
+	}
+	messageStr := string(messageJSON)
+	ws.WriteMessage(websocket.TextMessage, []byte(messageStr))
+}
+
+// Filter returns a new slice containing only elements that match the predicate
+func Filter[T any](slice []T, predicate func(T) bool) []T {
+	result := make([]T, 0, len(slice))
+	for _, item := range slice {
+		if predicate(item) {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// Map transforms each element of the slice using the mapper function
+func Map[T any, R any](slice []T, mapper func(T) R) []R {
+	result := make([]R, 0, len(slice))
+	for _, item := range slice {
+		result = append(result, mapper(item))
+	}
+	return result
+}
+
+func send_posts(ws *websocket.Conn, event_name string, list_post []PostEvent) {
+	var posts = PostEventMulti{
+		Event: event_name,
+		Data:  Map(list_post, func(msg PostEvent) ReceiveHolder { return msg.Data }),
+	}
+
+	messageJSON, err := json.Marshal(posts)
+	if err != nil {
+		fmt.Println("无法编码消息")
+		return
+	}
+	ws.WriteMessage(websocket.TextMessage, messageJSON)
+}
+
+func ws_send_history_multi2(ws *websocket.Conn, room string) {
+	// 0. filter list
+	var filteredList []PostEvent
+	filteredList = Filter(messageQueue.List, func(msg PostEvent) bool { return msg.Data.Room() == room })
+
+	fmt.Println("== send hist multi2:", ws.RemoteAddr(), room)
+
+	splitIndex := len(filteredList) - 15
+	if splitIndex < 0 {
+		splitIndex = 0
+	}
+	list_hist := filteredList[:splitIndex] // All elements except last 15, maybe []
+	list_news := filteredList[splitIndex:] // Last 15 elements
+
+	// 1. latest first
+	send_posts(ws, "receiveMulti", list_news)
+	// time.Sleep(time.Second * 2)
+
+	// 2. history later
+	if splitIndex > 0 {
+		send_posts(ws, "receiveMultiOld", list_hist)
 	}
 }
 
