@@ -15,14 +15,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/websocket"
+	websocket "github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip/safews"
+	// "github.com/gorilla/websocket"
 	"github.com/spaolacci/murmur3"
 )
 
 var (
-	upgrader = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
+	// upgrader = websocket.Upgrader{
+	// 	CheckOrigin: func(r *http.Request) bool {
+	// 		return true
+	// 	},
+	// }
+
+	upgrader = websocket.Upgrader{ // inherit from orig websocket.Upgrader
+		Upgrader: &websocket.OrigUpgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
 		},
 	}
 
