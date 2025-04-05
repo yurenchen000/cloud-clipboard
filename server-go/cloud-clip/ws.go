@@ -13,7 +13,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gorilla/websocket"
+	websocket "github.com/yurenchen000/cloud-clipboard/server-go/cloud-clip/safews"
+	// "github.com/gorilla/websocket"
 	"github.com/ua-parser/uap-go/uaparser"
 )
 
