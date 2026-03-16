@@ -1,6 +1,10 @@
 
+## tested 23.12, other maybe fine
 sanic==23.*
 pillow==9.*
+
+## 12,13,14 is fine, 14.2 is broken
+websockets<14.2
 
 ua-parser-py
 mmh3
