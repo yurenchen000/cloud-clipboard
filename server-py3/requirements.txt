@@ -3,7 +3,8 @@
 sanic==23.*
 pillow==9.*
 
-## 12,13,14 is fine, 14.2 is broken
+## sanic 23: websockets 12,13,14 is fine, 14.2 is broken
+## sanic 25: websockets 15 is fine
 websockets<14.2
 
 ua-parser-py
