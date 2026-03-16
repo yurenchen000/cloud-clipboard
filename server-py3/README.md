@@ -14,9 +14,22 @@ TODO:
 pip3 install -r requirements.txt
 ```
 
-//2. run server:  
-// at 0.0.0.0:8000
+//build frontend
+[README.md](../README.md#从源代码运行)
+
 ```sh
+cd ../client
+npm install
+npm run build
+```
+ got frontend files at ../server-node/static/
+
+<br>
+
+//2. run server:  
+// at 0.0.0.0:9501 (default config.json)
+```sh
+## link bulit frontend files
 ln -s ../server-node/static
 mkdir ./uploads
 python3 main.py
