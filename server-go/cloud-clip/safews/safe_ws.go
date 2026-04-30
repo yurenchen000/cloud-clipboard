@@ -4,6 +4,7 @@ package SafeWebsocket
 import (
 	"errors"
 	"log"
+	"time"
 
 	"net/http"
 
@@ -78,6 +79,30 @@ func (ws *Conn) WriteMessage(messageType int, data []byte) error {
 		return nil
 	}
 }
+
+// 等待 writePump 写完, 返回 nil;
+// 或者 timeout sec 超时, 返回 timeout err
+func (ws *Conn) Flush(timeout_ms int) error {
+	if ws.writeChan == nil {
+		return nil
+	}
+	done := make(chan struct{})
+	go func() {
+		for len(ws.writeChan) > 0 {
+			time.Sleep(time.Millisecond * 100)
+		}
+		close(done)
+	}()
+	select {
+	case <-done:
+		return nil
+	case <-ws.closeChan:
+		return errChanClosed
+	case <-time.After(time.Duration(timeout_ms) * time.Millisecond):
+		return errors.New("safe_ws: flush timeout")
+	}
+}
+
 func (ws *Conn) Close() error {
 	select {
 	case <-ws.closeChan: //closed: do nothing
