@@ -201,6 +201,7 @@ func handle_finish(w http.ResponseWriter, r *http.Request) {
 var flg_compatible = flag.Bool("compatible", false, "Try to be compatible with upstream client UI (will disable some incompatible features)")
 
 func handle_push(w http.ResponseWriter, r *http.Request) {
+	// fmt.Println("==handle_push")
 	room := r.URL.Query().Get("room")
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -229,6 +230,10 @@ func handle_push(w http.ResponseWriter, r *http.Request) {
 		forbid := `{"event":"forbidden","data":{}}`
 		fmt.Println("---forbid:", "\033[37;41m", fmt.Sprintf("%-21s", remoteAddr), ua, "\033[0m")
 		ws.WriteMessage(websocket.TextMessage, []byte(forbid))
+
+		//DONE: wait write finish
+		// time.Sleep(1*time.Second)
+		ws.Flush(2000)
 		return
 	}
 
