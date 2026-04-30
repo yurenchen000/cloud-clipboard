@@ -83,10 +83,10 @@ func (ws *Conn) Close() error {
 	case <-ws.closeChan: //closed: do nothing
 		return errChanClosed
 	default:
-		close(ws.closeChan)
+		close(ws.closeChan)                        //通知 .WriteMessage 不要再接新任务
 		writeChan := ws.writeChan
-		ws.writeChan = nil //avoid write to closed
-		close(writeChan)   //avoid for range leak
+		ws.writeChan = nil //avoid write to closed //先赋值 nil, 再关闭: 避免竞态 write closed chan
+		close(writeChan)   //avoid for range leak  //通知 .writePump 没有任务了
 		return ws.Conn.Close()
 		// return nil
 	}
