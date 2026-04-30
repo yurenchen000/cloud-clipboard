@@ -231,8 +231,9 @@ func handle_push(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("---forbid:", "\033[37;41m", fmt.Sprintf("%-21s", remoteAddr), ua, "\033[0m")
 		ws.WriteMessage(websocket.TextMessage, []byte(forbid))
 
-		//TODO: wait write finish
-		time.Sleep(1*time.Second)
+		//DONE: wait write finish
+		// time.Sleep(1*time.Second)
+		ws.Flush(2000)
 		return
 	}
 
