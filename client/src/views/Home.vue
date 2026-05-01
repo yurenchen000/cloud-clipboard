@@ -215,6 +215,9 @@ export default {
     },
     mounted() {
         this.$root.$on('global-drop-files', this.handleGlobalDropFiles);
+        // window._home = this;
+        // 在 F12 console 里访问 this: $('.container').__vue__
+        //   其中 .container 是 本组件的 根元素
     },
     beforeDestroy() {
         this.$root.$off('global-drop-files', this.handleGlobalDropFiles);
@@ -233,17 +236,22 @@ export default {
             }
         },
         handleGlobalDropFiles(files) {
-            // 只在宽屏时转发给 send-file
-            if (this.$refs.sendFile) {
+            //hidden-sm-and-down 或 hidden-md-and-up
+            const sendFileEl = this.$refs.sendFile && this.$refs.sendFile.$el;
+            const sendFileVisible = sendFileEl && sendFileEl.checkVisibility();
+            // const sendFileVisible = sendFileEl && sendFileEl.offsetParent !== null && sendFileEl.offsetWidth > 0;
+            // const sendFileVisible = sendFileEl && sendFileEl.offsetWidth > 0;
+            // console.log('-- handleGlobalDropFiles:', sendFileVisible)
+
+            // - sendFile 总会存在, 只是控制显隐
+            // - dialogFile 首次打开 dialog 才创建
+            if(this.$refs.sendFile) //总存在
                 this.$refs.sendFile.handleSelectFiles(files);
-            }
-            // 如果是窄屏，可以弹出 dialog 并切换到 file 模式
-            else if (this.$refs.dialogFile) {
+
+            // 如果是窄屏: 弹出 dialog 并切到 file 模式
+            if (!sendFileVisible) {
                 this.mode = 'file';
                 this.dialog = true;
-                this.$nextTick(() => {
-                    this.$refs.dialogFile.handleSelectFiles(files);
-                });
             }
         }
     },
