@@ -74,7 +74,8 @@ export default {
                     return new Promise((resolve, reject) => {
                         return resolve({
                           data: {//guess server config
-                            server: location.origin.replace(/^http/,'ws')+'/push',
+                            // server: location.origin.replace(/^http/,'ws')+'/push',
+                            server: location.origin.replace(/^http/,'ws')+location.pathname.replace(/\/$/,'')+'/push',
                             auth: !!(localStorage.getItem('auth') || localStorage.getItem('need_auth')),
                             status: 200,
                           }
