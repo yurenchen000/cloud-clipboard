@@ -107,6 +107,7 @@ export default {
                     const ws = new WebSocket(wsUrl);
                     ws.onopen = () => resolve(ws);
                     ws.onerror = reject;
+                    // console.log('1. onopen, onerr set.');
                 });
             }).then((/** @type {WebSocket} */ ws) => {
                 this.websocketConnecting = false;
@@ -114,8 +115,19 @@ export default {
                 this.received = [];
                 console.log('2. ack push:', performance.now())
                 this.$toast(this.$t('connectSuccess'));
-                setInterval(() => {ws.send('')}, 30000);
-                ws.onclose = () => {this.failure()};
+                // setInterval(() => {ws.send('')}, 30000);
+                ws.interval = setInterval(() => {
+                    console.log('== ws interval:', ws, ws.interval)
+                    ws.send('')
+                }, 30000);
+                ws.onclose = (e) => {
+                    console.log('== ws.onclose:', ws, e)
+                    clearInterval(ws.interval)
+                    this.failure()
+                };
+                ws.onerror = (e) => {
+                    console.log('== ws.onerror:', ws, e)
+                };
                 ws.onmessage = e => {
                     try {
                         let parsed = JSON.parse(e.data);
@@ -124,7 +136,7 @@ export default {
                 };
                 this.websocket = ws;
             }).catch(error => {
-                // console.log(error);
+                console.log('++ ws.onerror:', error);
                 this.websocketConnecting = false;
                 this.failure();
             });
