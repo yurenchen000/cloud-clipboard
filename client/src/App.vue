@@ -157,7 +157,11 @@
             </v-tooltip>
         </v-app-bar>
 
-        <v-main>
+
+        <v-main
+            @dragover.native.prevent
+            @drop.native.prevent="vmain_onDrop"
+        >
             <template v-if="$route.meta.keepAlive">
                 <keep-alive><router-view /></keep-alive>
             </template>
@@ -306,6 +310,16 @@ export default {
             localStorage.setItem('lightPrimary', newVal);
         });
     },
+    methods: {
+        vmain_onDrop(e) {
+            console.log('-- vmain_onDrop', e)
+            const files = Array.from(e.dataTransfer.files);
+            if (files.length) {
+                // 派发事件到 $root
+                this.$root.$emit('global-drop-files', files);
+            }
+        }
+    }
 };
 
 

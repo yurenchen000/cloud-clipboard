@@ -5,7 +5,7 @@
             <v-col cols="12" md="4" class="hidden-sm-and-down">
                 <send-text></send-text>
                 <v-divider class="my-4"></v-divider>
-                <send-file></send-file>
+                <send-file ref="sendFile"></send-file>
             </v-col>
             <!-- msg list -->
             <v-col cols="12" md="8">
@@ -213,6 +213,15 @@ export default {
             mdiSend,
         };
     },
+    mounted() {
+        this.$root.$on('global-drop-files', this.handleGlobalDropFiles);
+        // window._home = this;
+        // 在 F12 console 里访问 this: $('.container').__vue__
+        //   其中 .container 是 本组件的 根元素
+    },
+    beforeDestroy() {
+        this.$root.$off('global-drop-files', this.handleGlobalDropFiles);
+    },
     methods: {
         closeDialog() {
             this.dialog = false;
@@ -226,6 +235,25 @@ export default {
                 case 'file': setTimeout(() => this.$refs.dialogFile.focus(), 300); break;
             }
         },
+        handleGlobalDropFiles(files) {
+            //hidden-sm-and-down 或 hidden-md-and-up
+            const sendFileEl = this.$refs.sendFile && this.$refs.sendFile.$el;
+            const sendFileVisible = sendFileEl && sendFileEl.checkVisibility();
+            // const sendFileVisible = sendFileEl && sendFileEl.offsetParent !== null && sendFileEl.offsetWidth > 0;
+            // const sendFileVisible = sendFileEl && sendFileEl.offsetWidth > 0;
+            // console.log('-- handleGlobalDropFiles:', sendFileVisible)
+
+            // - sendFile 总会存在, 只是控制显隐
+            // - dialogFile 首次打开 dialog 才创建
+            if(this.$refs.sendFile) //总存在
+                this.$refs.sendFile.handleSelectFiles(files);
+
+            // 如果是窄屏: 弹出 dialog 并切到 file 模式
+            if (!sendFileVisible) {
+                this.mode = 'file';
+                this.dialog = true;
+            }
+        }
     },
     watch: {
         dialog(newval) {
