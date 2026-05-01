@@ -5,7 +5,7 @@
             <v-col cols="12" md="4" class="hidden-sm-and-down">
                 <send-text></send-text>
                 <v-divider class="my-4"></v-divider>
-                <send-file></send-file>
+                <send-file ref="sendFile"></send-file>
             </v-col>
             <!-- msg list -->
             <v-col cols="12" md="8">
@@ -213,6 +213,12 @@ export default {
             mdiSend,
         };
     },
+    mounted() {
+        this.$root.$on('global-drop-files', this.handleGlobalDropFiles);
+    },
+    beforeDestroy() {
+        this.$root.$off('global-drop-files', this.handleGlobalDropFiles);
+    },
     methods: {
         closeDialog() {
             this.dialog = false;
@@ -226,6 +232,20 @@ export default {
                 case 'file': setTimeout(() => this.$refs.dialogFile.focus(), 300); break;
             }
         },
+        handleGlobalDropFiles(files) {
+            // 只在宽屏时转发给 send-file
+            if (this.$refs.sendFile) {
+                this.$refs.sendFile.handleSelectFiles(files);
+            }
+            // 如果是窄屏，可以弹出 dialog 并切换到 file 模式
+            else if (this.$refs.dialogFile) {
+                this.mode = 'file';
+                this.dialog = true;
+                this.$nextTick(() => {
+                    this.$refs.dialogFile.handleSelectFiles(files);
+                });
+            }
+        }
     },
     watch: {
         dialog(newval) {
