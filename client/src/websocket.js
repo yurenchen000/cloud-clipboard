@@ -64,7 +64,7 @@ export default {
             this.$toast(this.retry ? this.$t('isReConnecting', {retry: this.retry}) : this.$t('isConnecting'), {
                 showClose: false,
                 dismissable: false,
-                timeout: 0,
+                timeout: -1,
             });
             console.log('0. req server:', performance.now())
 
@@ -159,7 +159,7 @@ export default {
                 this.$toast.error(this.$t('connectFailed_clickToConnect'), {
                     showClose: false,
                     dismissable: false,
-                    timeout: 0,
+                    timeout: -1,
                 });
             }
         },
