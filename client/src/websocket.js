@@ -117,7 +117,7 @@ export default {
                 this.$toast(this.$t('connectSuccess'));
                 // setInterval(() => {ws.send('')}, 30000);
                 ws.interval = setInterval(() => {
-                    console.log('== ws interval:', ws, ws.interval)
+                    // console.log('== ws interval:', ws, ws.interval)
                     ws.send('')
                 }, 30000);
                 ws.onclose = (e) => {
