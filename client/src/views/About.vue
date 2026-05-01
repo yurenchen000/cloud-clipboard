@@ -7,7 +7,21 @@
                 <br>
                 {{ $t('aboutDescription2') }}
                 <br>
-                <a href="https://github.com/TransparentLC/cloud-clipboard" target="_blank">GitHub</a>
+               
+                <br>
+                
+            <pre style="text-align: left;">
+                nodejs version: <a href="https://github.com/TransparentLC/cloud-clipboard" target="_blank">GitHub</a>
+
+                ----
+                go, py version: <a href="https://github.com/yurenchen000/cloud-clipboard" target="_blank">Github</a>
+
+                - server: golang, python version 
+                // go version with bundled frontend, only 9MB
+
+                - client: experience optimized version
+            </pre>
+
             </div>
         </v-row>
     </v-container>
