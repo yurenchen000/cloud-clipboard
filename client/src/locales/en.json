@@ -40,6 +40,7 @@
     "copyFailed": "copy failed",
     "cancel": "Cancel",
     "endOfList": "End of list",
+    "loading": "Loading...",
     "emptyList": "This list is empty",
     "sendText": "Send Text",
     "sendFile": "Send File",
