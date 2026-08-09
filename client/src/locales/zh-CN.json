@@ -40,6 +40,7 @@
     "copyFailed": "复制失败",
     "cancel": "取消",
     "endOfList": "已经到底了哦～",
+    "loading": "加载中...",
     "emptyList": "这里空空的",
     "sendText": "发送文本",
     "sendFile": "发送文件",

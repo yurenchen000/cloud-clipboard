@@ -9,6 +9,7 @@ export default {
             roomInput: '',
             roomDialog: false,
             retry: 0,
+            receivedLoading: true,
             event: {
                 //add to latest
                 receive: data => {
@@ -16,11 +17,18 @@ export default {
                 },
                 //add to latest, data item old first
                 receiveMulti: data => {
-                    this.$root.received.unshift(...Array.from(data).reverse());
+                    console.log('--- render first page directly')
+                    this.receivedLoading = true;
+                    // this.$root.received.unshift(...Array.from(data).reverse());
+                    this.appendChunked(Array.from(data).reverse(), 'unshift');
                 },
                 //add to oldest, data item old first
                 receiveMultiOld: data => {
-                    this.$root.received.push(...Array.from(data).reverse());
+                    //this.$root.received.push(...Array.from(data).reverse());
+                    //--- improve ui stuck: load large list by chunk
+                    console.log('--- render other pages by chunk')
+                    this.appendChunked(Array.from(data).reverse(), 'push');
+                    this.receivedLoading = false; ///loading done
                 },
                 revoke: data => {
                     let index = this.$root.received.findIndex(e => e.id === data.id);
@@ -30,6 +38,7 @@ export default {
                 config: data => {
                     this.retry = 0; //real success login
                     this.$root.config = data;
+                    this.receivedLoading = true;
                     console.log(
                         `%c Cloud Clipboard ${data.version} by TransparentLC %c https://github.com/TransparentLC/cloud-clipboard `,
                         'color:#fff;background-color:#1e88e5',
@@ -112,6 +121,7 @@ export default {
             }).then((/** @type {WebSocket} */ ws) => {
                 this.websocketConnecting = false;
                 // this.retry = 0;
+                this.cancelChunkFrame();
                 this.received = [];
                 console.log('2. ack push:', performance.now())
                 this.$toast(this.$t('connectSuccess'));
@@ -143,12 +153,44 @@ export default {
         },
         disconnect() {
             this.websocketConnecting = false;
+            this.cancelChunkFrame();
             if (this.websocket) {
                 this.websocket.onclose = () => {};
                 this.websocket.close();
                 this.websocket = null;
             }
             this.$root.device = [];
+        },
+        cancelChunkFrame() {
+            cancelAnimationFrame(this._chunkFrame);
+            this._chunkFrame = null;
+            this.receivedLoading = false;
+        },
+        appendChunked(items, mode = 'push', chunkSize = 2000) {
+            this.cancelChunkFrame();
+            if (!Array.isArray(items) || !items.length) return;
+            this.receivedLoading = true;
+            const received = this.$root.received;
+            const chunks = [];
+            for (let i = 0; i < items.length; i += chunkSize) {
+                chunks.push(items.slice(i, i + chunkSize));
+            }
+            if (mode === 'unshift') chunks.reverse();
+            let index = 0;
+            const step = () => {
+                const chunk = chunks[index++];
+                if (mode === 'unshift') {
+                    received.unshift(...chunk);
+                } else {
+                    received.push(...chunk);
+                }
+                if (index < chunks.length) {
+                    this._chunkFrame = requestAnimationFrame(step);
+                } else {
+                    // this.receivedLoading = false;
+                }
+            };
+            step();
         },
         failure() {
             this.websocket = null;
