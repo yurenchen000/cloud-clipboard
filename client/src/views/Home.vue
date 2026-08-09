@@ -12,7 +12,7 @@
                 <v-fade-transition group>
                     <div :is="`received-${item.type}`" v-for="item in $root.received" :key="item.id" :meta="item"></div>
                 </v-fade-transition>
-                <div class="text-center caption text--secondary py-2">{{ $root.received.length ? $t('endOfList') : $t('emptyList') }}</div>
+                <div class="text-center caption text--secondary py-2">{{ $root.receivedLoading ? $t('loading') : ($root.received.length ? $t('endOfList') : $t('emptyList')) }}</div>
             </v-col>
         </v-row>
 
