@@ -10,10 +10,15 @@ export default {
             roomDialog: false,
             retry: 0,
             receivedLoading: true,
+            receivedBuffer: [],   //延迟渲染的历史数据(receiveMultiOld), 用户点"加载更多"才渲染
+            bulkRendering: false, //正在分块渲染(用于临时关闭过渡动画)
+            bulkDone: 0,          //分块渲染进度: 已渲染条数
+            bulkTotal: 0,         //分块渲染进度: 总条数
             event: {
                 //add to latest
                 receive: data => {
-                    this.$root.received.unshift(data);
+                    //冻结数据, 跳过 Vue 深层响应式劫持(列表项只读)
+                    this.$root.received.unshift(Object.freeze(data));
                 },
                 //add to latest, data item old first
                 receiveMulti: data => {
@@ -24,16 +29,17 @@ export default {
                 },
                 //add to oldest, data item old first
                 receiveMultiOld: data => {
-                    //this.$root.received.push(...Array.from(data).reverse());
-                    //--- improve ui stuck: load large list by chunk
-                    console.log('--- render other pages by chunk')
-                    this.appendChunked(Array.from(data).reverse(), 'push');
-                    this.receivedLoading = false; ///loading done
+                    //不再自动渲染历史(旧)数据: 先缓存到 receivedBuffer,
+                    //由用户点击"加载更多"按钮时再分块渲染, 规避移动端主线程阻塞.
+                    this.receivedBuffer.push(...Array.from(data).reverse());
+                    this.receivedLoading = false; //首屏(第一页)已就绪
                 },
                 revoke: data => {
                     let index = this.$root.received.findIndex(e => e.id === data.id);
-                    if (index === -1) return;
-                    this.$root.received.splice(index, 1);
+                    if (index !== -1) this.$root.received.splice(index, 1);
+                    //同时从未渲染的缓存里移除(可能还没被"加载更多"渲染出来)
+                    let bufIndex = this.receivedBuffer.findIndex(e => e.id === data.id);
+                    if (bufIndex !== -1) this.receivedBuffer.splice(bufIndex, 1);
                 },
                 config: data => {
                     this.retry = 0; //real success login
@@ -123,6 +129,7 @@ export default {
                 // this.retry = 0;
                 this.cancelChunkFrame();
                 this.received = [];
+                this.receivedBuffer = [];
                 console.log('2. ack push:', performance.now())
                 this.$toast(this.$t('connectSuccess'));
                 // setInterval(() => {ws.send('')}, 30000);
@@ -162,34 +169,84 @@ export default {
             this.$root.device = [];
         },
         cancelChunkFrame() {
+            //令牌自增, 使仍在排队(未执行)的 step/nextTick 回调失效, 避免重入重复渲染
+            this._chunkToken = (this._chunkToken || 0) + 1;
             cancelAnimationFrame(this._chunkFrame);
             this._chunkFrame = null;
             this.receivedLoading = false;
+            this.bulkRendering = false;
         },
-        appendChunked(items, mode = 'push', chunkSize = 20) {
-            console.log('--- appendChunked', items.length, mode, chunkSize);
+        //把缓存的历史数据(receiveMultiOld)渲染出来: 用户点击"加载更多"时调用
+        loadBuffered() {
+            if (!this.receivedBuffer.length || this.bulkRendering) return;
+            const items = this.receivedBuffer;
+            this.receivedBuffer = []; //先清空, 渲染过程中按钮消失
+            this.appendChunked(items, 'push');
+        },
+        /**
+         * 自适应时间分块渲染: 每帧只渲染"约 frameBudget 毫秒"能处理的条数,
+         * 帧与帧之间用 requestAnimationFrame 让出主线程 -> 加载过程中按钮仍可点击.
+         * @param {Array} items 已按目标顺序排好的数据
+         * @param {'push'|'unshift'} mode push=追加到列表底部, unshift=插入到列表顶部
+         */
+        appendChunked(items, mode = 'push', opts = {}) {
             this.cancelChunkFrame();
-            if (!Array.isArray(items) || !items.length) return;
-            this.receivedLoading = true;
-            const received = this.$root.received;
-            const chunks = [];
-            for (let i = 0; i < items.length; i += chunkSize) {
-                chunks.push(items.slice(i, i + chunkSize));
+            if (!Array.isArray(items) || !items.length) {
+                this.bulkDone = this.bulkTotal = 0;
+                if (opts.onDone) opts.onDone();
+                return;
             }
-            if (mode === 'unshift') chunks.reverse();
+            const token = this._chunkToken;
+            const received = this.$root.received;
+            const freeze = opts.freeze !== false;       //冻结每条数据, 跳过 Vue 深层响应式劫持
+            const frameBudget = opts.frameBudget || 10;  //每帧目标耗时(ms)
+            const MIN_CHUNK = 6, MAX_CHUNK = 300;
+            let chunkSize = opts.initialChunk || 24;     //首帧先保守一点
             let index = 0;
+            let insertPos = 0; //unshift 模式下的移动插入位置, 保证批次间顺序正确
+
+            this.receivedLoading = true;
+            this.bulkRendering = true;
+            this.bulkTotal = items.length;
+            this.bulkDone = 0;
+
             const step = () => {
-                const chunk = chunks[index++];
+                if (token !== this._chunkToken) return; //已被取消/被新任务取代
+                const t0 = performance.now();
+                const end = Math.min(index + chunkSize, items.length);
+                const batch = items.slice(index, end);
+                index = end;
+                if (freeze) {
+                    for (let i = 0; i < batch.length; i++) Object.freeze(batch[i]);
+                }
                 if (mode === 'unshift') {
-                    received.unshift(...chunk);
+                    received.splice(insertPos, 0, ...batch);
+                    insertPos += batch.length;
                 } else {
-                    received.push(...chunk);
+                    received.push(...batch);
                 }
-                if (index < chunks.length) {
-                    this._chunkFrame = requestAnimationFrame(step);
-                } else {
-                    // this.receivedLoading = false;
-                }
+                this.bulkDone = index;
+                //等 DOM 更新(nextTick)后再测量, 这样耗时包含"push + 组件创建/渲染"
+                this.$nextTick(() => {
+                    if (token !== this._chunkToken) return;
+                    const dt = performance.now() - t0;
+                    if (dt > 0) {
+                        //根据实测耗时调整下一帧条数, 向 frameBudget 收敛(带阻尼);
+                        //dt 极小时 adapted 会很大, 但被 MAX_CHUNK 夹住, 不会溢出
+                        const adapted = Math.round(chunkSize * (frameBudget / dt));
+                        chunkSize = Math.round((chunkSize + adapted) / 2);
+                        chunkSize = Math.max(MIN_CHUNK, Math.min(MAX_CHUNK, chunkSize));
+                    }
+                    if (index < items.length) {
+                        this._chunkFrame = requestAnimationFrame(step);
+                    } else {
+                        this._chunkFrame = null;
+                        this.receivedLoading = false;
+                        this.bulkRendering = false;
+                        this.bulkDone = this.bulkTotal = 0;
+                        if (opts.onDone) opts.onDone();
+                    }
+                });
             };
             step();
         },
