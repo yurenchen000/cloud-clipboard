@@ -166,7 +166,8 @@ export default {
             this._chunkFrame = null;
             this.receivedLoading = false;
         },
-        appendChunked(items, mode = 'push', chunkSize = 2000) {
+        appendChunked(items, mode = 'push', chunkSize = 20) {
+            console.log('--- appendChunked', items.length, mode, chunkSize);
             this.cancelChunkFrame();
             if (!Array.isArray(items) || !items.length) return;
             this.receivedLoading = true;
