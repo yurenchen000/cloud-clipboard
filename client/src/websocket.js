@@ -67,6 +67,12 @@ export default {
             },
         };
     },
+    computed: {
+        //分块渲染进度百分比: 供全局 $root.bulkPercent 使用(App.vue 悬浮进度条等)
+        bulkPercent() {
+            return this.bulkTotal ? Math.round(100 * this.bulkDone / this.bulkTotal) : 0;
+        },
+    },
     watch: {
         room() {
             this.disconnect();
