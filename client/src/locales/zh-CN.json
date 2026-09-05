@@ -41,6 +41,7 @@
     "cancel": "取消",
     "endOfList": "已经到底了哦～",
     "loading": "加载中...",
+    "loadMore": "加载更早的 {count} 条",
     "emptyList": "这里空空的",
     "sendText": "发送文本",
     "sendFile": "发送文件",
