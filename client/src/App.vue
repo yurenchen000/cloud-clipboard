@@ -168,6 +168,29 @@
             <router-view v-else />
         </v-main>
 
+        <!-- 全局悬浮加载进度条: 固定在顶栏下方, 始终可见(不会被列表内容顶出屏幕);
+             pointer-events:none 保证加载期间不拦截点击/滚动 -->
+        <v-sheet
+            v-if="$root.bulkRendering"
+            rounded
+            elevation="6"
+            color="surface"
+            class="bulk-float pa-2"
+            :style="{ top: ($vuetify.application.top || 0) + 8 + 'px' }"
+        >
+            <v-progress-linear
+                :value="$root.bulkPercent"
+                color="primary"
+                background-color="primary"
+                background-opacity="0.15"
+                height="6"
+                rounded
+            ></v-progress-linear>
+            <div class="caption text--secondary mt-1 text-center">
+                {{ $t('loading') }} {{ $root.bulkDone }}/{{ $root.bulkTotal }}
+            </div>
+        </v-sheet>
+
         <v-dialog v-model="colorDialog" max-width="300" hide-overlay>
             <v-card>
                 <v-card-title>{{  $t('pickPrimaryColor') }}</v-card-title>
@@ -245,6 +268,16 @@
 <style scoped>
 .v-navigation-drawer >>> .v-navigation-drawer__border {
     pointer-events: none;
+}
+/* 全局悬浮加载进度条: 固定在顶栏下方居中, 始终可见 */
+.bulk-float {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    max-width: 90vw;
+    z-index: 10;
+    pointer-events: none; /* 不拦截点击/滚动, 保证加载期间 UI 仍可交互 */
 }
 </style>
 

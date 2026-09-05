@@ -13,20 +13,9 @@
                     <div :is="`received-${item.type}`" v-for="item in $root.received" :key="item.id" :meta="item"></div>
                 </v-fade-transition>
                 <div class="text-center py-2">
-                    <!-- 分块渲染中: 显示进度 -->
-                    <template v-if="$root.bulkRendering">
-                        <v-progress-circular
-                            :value="bulkPercent"
-                            size="18"
-                            width="2"
-                            color="primary"
-                            class="mr-2"
-                        ></v-progress-circular>
-                        <span class="caption text--secondary">{{ $t('loading') }} {{ $root.bulkDone }}/{{ $root.bulkTotal }}</span>
-                    </template>
-                    <!-- 有延迟加载的历史数据: 显示"加载更多"按钮 -->
+                    <!-- 有延迟加载的历史数据: 显示"加载更多"按钮(渲染进行中则隐藏, 进度见顶部悬浮条) -->
                     <v-btn
-                        v-else-if="$root.receivedBuffer.length"
+                        v-if="$root.receivedBuffer.length && !$root.bulkRendering"
                         text
                         small
                         color="primary"
@@ -35,8 +24,8 @@
                         <v-icon left small>{{ mdiArrowExpandDown }}</v-icon>
                         {{ $t('loadMore', { count: $root.receivedBuffer.length }) }}
                     </v-btn>
-                    <!-- 空闲状态 -->
-                    <span v-else class="caption text--secondary">{{ $root.receivedLoading ? $t('loading') : ($root.received.length ? $t('endOfList') : $t('emptyList')) }}</span>
+                    <!-- 空闲状态(非批量渲染时) -->
+                    <span v-else-if="!$root.bulkRendering" class="caption text--secondary">{{ $root.receivedLoading ? $t('loading') : ($root.received.length ? $t('endOfList') : $t('emptyList')) }}</span>
                 </div>
             </v-col>
         </v-row>
@@ -237,11 +226,6 @@ export default {
             mdiChevronDoubleDown,
             mdiSend,
         };
-    },
-    computed: {
-        bulkPercent() {
-            return this.$root.bulkTotal ? Math.round(100 * this.$root.bulkDone / this.$root.bulkTotal) : 0;
-        },
     },
     mounted() {
         this.$root.$on('global-drop-files', this.handleGlobalDropFiles);
