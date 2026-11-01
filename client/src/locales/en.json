@@ -41,6 +41,7 @@
     "cancel": "Cancel",
     "endOfList": "End of list",
     "loading": "Loading...",
+    "loadMore": "Load {count} older item(s)",
     "emptyList": "This list is empty",
     "sendText": "Send Text",
     "sendFile": "Send File",

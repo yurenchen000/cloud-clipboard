@@ -9,10 +9,24 @@
             </v-col>
             <!-- msg list -->
             <v-col cols="12" md="8">
-                <v-fade-transition group>
+                <v-fade-transition group :css="!$root.bulkRendering">
                     <div :is="`received-${item.type}`" v-for="item in $root.received" :key="item.id" :meta="item"></div>
                 </v-fade-transition>
-                <div class="text-center caption text--secondary py-2">{{ $root.receivedLoading ? $t('loading') : ($root.received.length ? $t('endOfList') : $t('emptyList')) }}</div>
+                <div class="text-center py-2">
+                    <!-- 有延迟加载的历史数据: 显示"加载更多"按钮(渲染进行中则隐藏, 进度见顶部悬浮条) -->
+                    <v-btn
+                        v-if="$root.receivedBuffer.length && !$root.bulkRendering"
+                        text
+                        small
+                        color="primary"
+                        @click="$root.loadBuffered()"
+                    >
+                        <v-icon left small>{{ mdiArrowExpandDown }}</v-icon>
+                        {{ $t('loadMore', { count: $root.receivedBuffer.length }) }}
+                    </v-btn>
+                    <!-- 空闲状态(非批量渲染时) -->
+                    <span v-else-if="!$root.bulkRendering" class="caption text--secondary">{{ $root.receivedLoading ? $t('loading') : ($root.received.length ? $t('endOfList') : $t('emptyList')) }}</span>
+                </div>
             </v-col>
         </v-row>
 
